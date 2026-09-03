@@ -4,6 +4,17 @@ struct Country: Identifiable, Hashable {
     let code: String   // ISO 3166-1 alpha-2
     let name: String
     var id: String { code }
+
+    /// Emoji flag for `code`, built from Unicode regional-indicator symbols
+    /// (e.g. "ES" → 🇪🇸). Rendered by the OS, so it always matches the real flag
+    /// and needs no bundled assets.
+    var flag: String {
+        code.unicodeScalars.reduce(into: "") { result, scalar in
+            if let indicator = UnicodeScalar(0x1F1E6 + scalar.value - 0x41) {
+                result.unicodeScalars.append(indicator)
+            }
+        }
+    }
 }
 
 /// Country list for the home-country picker. Built from the system's ISO region
