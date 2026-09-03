@@ -15,29 +15,39 @@ real views. All artboards are **portrait**.
 
 ---
 
-## 1. Palette — light base, single amber accent
+## 1. Palette — light + dark, single amber accent
 
-| Token (`Theme.Palette`) | Hex | Role |
-|---|---|---|
-| `ground` | `#F5F3EF` | App background / paper ground behind every screen |
-| `surface` | `#FFFFFF` | Raised screen, primary card |
-| `surfaceSunken` | `#F4F1EC` | Inset card fill — passport stat cards, grouped settings rows |
-| `panel` | `#F1EEE8` | Onboarding-tour hero panel |
-| `fill` | `#EFEBE3` | Subtle fill (chips at rest, faint blocks) |
-| `fillStrong` | `#EAE6DF` | Stronger fill / nav-bar top hairline zone |
-| `border` | `#E4E0D9` | Hairline border on white |
-| `divider` | `#E2DED7` | Divider *inside* a sunken card |
-| `track` | `#E0DCD4` | Progress-bar track, inactive toggle track |
-| `accent` | `#D09A42` | The one accent. Stat numbers, progress fills, active nav, primary CTAs, map highlights |
-| `accentHigh` | `#E8B75F` | Link hover / pressed emphasis |
-| `onAccent` | `#0A0A0A` | Text + glyph on top of an amber fill |
-| `textPrimary` | `#0A0A0A` | Primary text, display, CTA label on amber |
-| `textHeading` | `#14161A` | Dark UI chrome text, line-icon strokes |
-| `textBody` | `#4A4740` | Body-strong |
-| `textSecondary` | `#77736C` | Secondary copy |
-| `textTertiary` | `#8F8B84` | Labels, captions, inactive icon stroke |
-| `textDisabled` | `#B4B0A8` | Disabled text, empty flag placeholder glyph |
-| `danger` | `#D96A4A` | Destructive ("Log out", "Delete account") |
+The app follows the **system appearance** (default light). Every token is
+adaptive — `Color(light:dark:)` in `Theme.swift`. Light values from
+`Suite Screens Light.dc.html`, dark from `Suite Screens.dc.html`
+("near-black base"). Dark shades are calibrated from the dark style-sheet
+artboard's six swatches and refined per screen as batches build against the
+dark artboards.
+
+| Token (`Theme.Palette`) | Light | Dark | Role |
+|---|---|---|---|
+| `ground` | `#F5F3EF` | `#0F0F10` | App background behind every screen |
+| `surface` | `#FFFFFF` | `#141415` | Raised screen, primary card |
+| `surfaceSunken` | `#F4F1EC` | `#1A1A1B` | Inset card fill — stat cards, grouped rows |
+| `panel` | `#F1EEE8` | `#1A1A1B` | Onboarding-tour hero panel |
+| `fill` | `#EFEBE3` | `#1F1F20` | Subtle fill (chips at rest) |
+| `fillStrong` | `#EAE6DF` | `#232325` | Stronger fill / nav hairline zone |
+| `border` | `#E4E0D9` | `#232323` | Hairline border |
+| `divider` | `#E2DED7` | `#2A2A2C` | Divider inside a sunken card |
+| `track` | `#E0DCD4` | `#2E2E30` | Progress-bar track, inactive toggle |
+| `accent` | `#D09A42` | `#D09A42` | The one accent (unchanged both modes) |
+| `accentHigh` | `#E8B75F` | `#E8B75F` | Link hover / pressed emphasis |
+| `onAccent` | `#0A0A0A` | `#0A0A0A` | Text/glyph on an amber fill (amber stays light) |
+| `textPrimary` | `#0A0A0A` | `#FFFFFF` | Primary text, display, CTA label on amber |
+| `textHeading` | `#14161A` | `#F2F0EC` | Dark-chrome text, line-icon strokes |
+| `textBody` | `#4A4740` | `#C9C4BC` | Body-strong |
+| `textSecondary` | `#77736C` | `#8A857E` | Secondary copy |
+| `textTertiary` | `#8F8B84` | `#6E6A64` | Labels, captions, inactive icon stroke |
+| `textDisabled` | `#B4B0A8` | `#57534D` | Disabled text |
+| `danger` | `#D96A4A` | `#E07C5C` | Destructive ("Log out", "Delete account") |
+
+The auth-screen hero panel is a fixed `#0A0A0A` in **both** modes (deliberate
+night-map treatment).
 
 Single-accent rule holds. **One deliberate exception** (from `CLAUDE.md` + compendium):
 full-colour category / flag icons on the Map and suitcase-builder screens carry identity
@@ -142,8 +152,10 @@ Circular gauge: SVG ring, `track` under-stroke + `accent` over-stroke, stroke wi
   `divider`.
 - **List / result row** — `surface`, radius 16, height ~58–62; leading flag or icon chip
   (30×22, radius 4–5), title, optional sub-label, trailing chevron.
-- **Flag chip** — 30×22 (lists) / 34×24 (search), radius 4–5; visited = `accent` fill +
-  `onAccent` mono code; unvisited = `track` fill + `textDisabled` code.
+- **Flag chip** — 30×22 (lists) / 34×24 (search); the country's emoji flag
+  (`Country.flag`, from Unicode regional-indicator symbols), OS-rendered at ~26pt,
+  no fill or border. Selected/visited state reads from the row, not the chip.
+  Missing-flag fallback: `track` fill + `textDisabled` glyph.
 - **Bottom nav** — exactly 3 icons, order **map · suitcase · passport**; active icon
   filled `accent` with `onAccent` interior detail; inactive stroked `textTertiary`.
 - **Selected checkmark** — `accent` filled circle, `onAccent` tick.
@@ -154,10 +166,18 @@ Circular gauge: SVG ring, `track` under-stroke + `accent` over-stroke, stroke wi
 
 ## 7. Icons
 
-Line icons drawn on a 24 viewBox, single stroke weight **`sw` ≈ 1.6**, round caps and
-joins, no fill. Active/selected state = `accent` fill. `CLAUDE.md` names Lucide as the
-library; the canvas uses Lucide-equivalent custom paths. See open item in the batch-1
-review notes for the icon-delivery approach.
+**Lucide**, bundled as template SVGs in `Suite/Resources/Assets.xcassets/Lucide/`
+(~40 glyphs, stroke nudged from Lucide's native 2.0 → **1.75** on the 24 grid to sit
+closer to the canvas `sw`). Accessed via `SuiteIcon` / `SuiteIconView`, which tints with
+`.foregroundStyle`. Round caps/joins, no fill.
+
+**One exception — the bottom-nav glyphs** (`BottomNavBar.swift`): map / suitcase /
+passport stay hand-drawn `Path`s. The design draws them bespoke (the map is 3 overlapping
+panels, not Lucide's folded `map`) with a **filled amber active state** a stroke icon
+can't do. Every other icon in the app is Lucide.
+
+Full-colour category / flag icons on Map + suitcase-builder screens are a separate,
+deliberate multi-colour exception (§1).
 
 Sizes: `24` standard · `28` nav · `18` inline with text · `16` trailing chevron.
 
