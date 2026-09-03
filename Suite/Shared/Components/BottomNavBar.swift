@@ -77,57 +77,95 @@ private struct TabGlyph: View {
         }
     }
 
-    // Briefcase: handle + body + slats + feet.
+    // Wheeled suitcase: telescoping handle + hard-shell body + ridge slats + side grab + spinner wheels.
     private func suitcaseShape(_ s: CGFloat) -> some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 3 * s)
+            // Telescoping handle — inverted U rising above the shell.
+            Path { p in
+                p.move(to: CGPoint(x: 9.2 * s, y: 6.4 * s))
+                p.addLine(to: CGPoint(x: 9.2 * s, y: 3.4 * s))
+                p.addQuadCurve(to: CGPoint(x: 10.4 * s, y: 2.4 * s), control: CGPoint(x: 9.2 * s, y: 2.4 * s))
+                p.addLine(to: CGPoint(x: 13.6 * s, y: 2.4 * s))
+                p.addQuadCurve(to: CGPoint(x: 14.8 * s, y: 3.4 * s), control: CGPoint(x: 14.8 * s, y: 2.4 * s))
+                p.addLine(to: CGPoint(x: 14.8 * s, y: 6.4 * s))
+            }
+            .stroke(line, style: StrokeStyle(lineWidth: lineWidth * s, lineCap: .round, lineJoin: .round))
+
+            // Hard-shell body.
+            RoundedRectangle(cornerRadius: 2.8 * s)
                 .fill(accent)
-                .overlay(RoundedRectangle(cornerRadius: 3 * s).stroke(line, lineWidth: lineWidth * s))
-                .frame(width: 16 * s, height: 12.6 * s)
-                .position(x: 12 * s, y: 13.5 * s)
+                .overlay(RoundedRectangle(cornerRadius: 2.8 * s).stroke(line, lineWidth: lineWidth * s))
+                .frame(width: 13.6 * s, height: 13.4 * s)
+                .position(x: 12 * s, y: 13 * s)
 
-            RoundedRectangle(cornerRadius: 1.6 * s)
-                .stroke(isActive ? Theme.Palette.accent : Theme.Palette.textTertiary, lineWidth: lineWidth * s)
-                .frame(width: 5 * s, height: 4.6 * s)
-                .position(x: 12 * s, y: 4.9 * s)
+            // Side grab handle — small nub on the right edge.
+            RoundedRectangle(cornerRadius: 1 * s)
+                .fill(accent)
+                .overlay(RoundedRectangle(cornerRadius: 1 * s).stroke(line, lineWidth: lineWidth * s))
+                .frame(width: 2 * s, height: 4.4 * s)
+                .position(x: 19.4 * s, y: 12.6 * s)
 
+            // Vertical ridge slats.
             Path { p in
                 for x in [9.2, 12.0, 14.8] {
-                    p.move(to: CGPoint(x: x * s, y: 10.4 * s))
-                    p.addLine(to: CGPoint(x: x * s, y: 16.6 * s))
+                    p.move(to: CGPoint(x: x * s, y: 8.8 * s))
+                    p.addLine(to: CGPoint(x: x * s, y: 17.2 * s))
                 }
             }
-            .stroke(line, style: StrokeStyle(lineWidth: (isActive ? 1.4 : Theme.Icon.stroke) * s, lineCap: .round))
+            .stroke(line, style: StrokeStyle(lineWidth: (isActive ? 1.3 : Theme.Icon.stroke) * s, lineCap: .round))
 
-            ForEach([8.0, 16.0], id: \.self) { x in
+            // Spinner wheels.
+            ForEach([9.4, 14.6], id: \.self) { x in
                 Circle()
-                    .fill(isActive ? Theme.Palette.accent : .clear)
-                    .overlay(Circle().stroke(isActive ? Theme.Palette.accent : Theme.Palette.textTertiary, lineWidth: lineWidth * s))
-                    .frame(width: 2.4 * s, height: 2.4 * s)
-                    .position(x: x * s, y: 21.2 * s)
+                    .stroke(line, lineWidth: lineWidth * s)
+                    .frame(width: 2.2 * s, height: 2.2 * s)
+                    .position(x: x * s, y: 20.9 * s)
             }
         }
     }
 
-    // Passport / ID: cover + portrait circle + line.
+    // Passport: front cover peeled open above the spine, globe emblem, two ID lines.
     private func passportShape(_ s: CGFloat) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 2.4 * s)
+        let thin = (isActive ? 1.6 : Theme.Icon.stroke) * s
+        return ZStack {
+            // Page block / inner cover.
+            RoundedRectangle(cornerRadius: 2.2 * s)
                 .fill(accent)
-                .overlay(RoundedRectangle(cornerRadius: 2.4 * s).stroke(isActive ? Theme.Palette.accent : Theme.Palette.textTertiary, lineWidth: lineWidth * s))
-                .frame(width: 15 * s, height: 18 * s)
-                .position(x: 12 * s, y: 12 * s)
+                .overlay(RoundedRectangle(cornerRadius: 2.2 * s).stroke(isActive ? Theme.Palette.accent : Theme.Palette.textTertiary, lineWidth: lineWidth * s))
+                .frame(width: 13 * s, height: 15.2 * s)
+                .position(x: 12 * s, y: 12.9 * s)
 
-            Circle()
-                .stroke(line, lineWidth: (isActive ? 1.6 : Theme.Icon.stroke) * s)
-                .frame(width: 6.8 * s, height: 6.8 * s)
-                .position(x: 12 * s, y: 10.6 * s)
-
+            // Opened front cover — shallow tent off the top edge.
             Path { p in
-                p.move(to: CGPoint(x: 8.4 * s, y: 17.2 * s))
-                p.addLine(to: CGPoint(x: 15.6 * s, y: 17.2 * s))
+                p.move(to: CGPoint(x: 5.6 * s, y: 5.4 * s))
+                p.addLine(to: CGPoint(x: 16.8 * s, y: 2.4 * s))
+                p.addLine(to: CGPoint(x: 18.6 * s, y: 5.4 * s))
             }
-            .stroke(line, style: StrokeStyle(lineWidth: (isActive ? 1.6 : Theme.Icon.stroke) * s, lineCap: .round))
+            .stroke(line, style: StrokeStyle(lineWidth: lineWidth * s, lineCap: .round, lineJoin: .round))
+
+            // Globe emblem — outline, meridian, equator.
+            Circle()
+                .stroke(line, lineWidth: thin)
+                .frame(width: 7 * s, height: 7 * s)
+                .position(x: 12 * s, y: 11 * s)
+            Ellipse()
+                .stroke(line, lineWidth: thin)
+                .frame(width: 3 * s, height: 7 * s)
+                .position(x: 12 * s, y: 11 * s)
+            Path { p in
+                p.move(to: CGPoint(x: 8.5 * s, y: 11 * s))
+                p.addLine(to: CGPoint(x: 15.5 * s, y: 11 * s))
+            }
+            .stroke(line, style: StrokeStyle(lineWidth: thin, lineCap: .round))
+
+            // Two ID lines below the emblem.
+            Path { p in
+                p.move(to: CGPoint(x: 8.8 * s, y: 16.2 * s))
+                p.addLine(to: CGPoint(x: 15.2 * s, y: 16.2 * s))
+                p.move(to: CGPoint(x: 10.2 * s, y: 18.2 * s))
+                p.addLine(to: CGPoint(x: 13.8 * s, y: 18.2 * s))
+            }
+            .stroke(line, style: StrokeStyle(lineWidth: thin, lineCap: .round))
         }
     }
 
