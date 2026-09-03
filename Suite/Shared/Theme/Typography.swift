@@ -48,13 +48,14 @@ extension Font {
     }
 }
 
-/// The Suite wordmark: "Suite" in primary + an amber full stop.
+/// The Suite wordmark: "Suite" in `wordColor` + an amber full stop.
 struct Wordmark: View {
     var size: CGFloat = 26
+    var wordColor: Color = Theme.Palette.textPrimary
 
     var body: some View {
         HStack(spacing: 0) {
-            Text("Suite").foregroundStyle(Theme.Palette.textPrimary)
+            Text("Suite").foregroundStyle(wordColor)
             Text(".").foregroundStyle(Theme.Palette.accent)
         }
         .font(.archivo(size, .heavy))

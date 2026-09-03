@@ -1,0 +1,87 @@
+import Foundation
+
+struct Country: Identifiable, Hashable {
+    let code: String   // ISO 3166-1 alpha-2
+    let name: String
+    var id: String { code }
+
+    /// Emoji flag for `code`, built from Unicode regional-indicator symbols
+    /// (e.g. "ES" → 🇪🇸). Rendered by the OS, so it always matches the real flag
+    /// and needs no bundled assets.
+    var flag: String {
+        code.unicodeScalars.reduce(into: "") { result, scalar in
+            if let indicator = UnicodeScalar(0x1F1E6 + scalar.value - 0x41) {
+                result.unicodeScalars.append(indicator)
+            }
+        }
+    }
+}
+
+/// Country list for the home-country picker. Built from the system's ISO region
+/// data — no bundled data file. Continent grouping (needed for the Passport tab)
+/// comes in batch 6.
+enum Countries {
+    static let all: [Country] = {
+        let english = Locale(identifier: "en_US")
+        return Locale.Region.isoRegions
+            .filter { $0.identifier.count == 2 }
+            .compactMap { region in
+                english.localizedString(forRegionCode: region.identifier)
+                    .map { Country(code: region.identifier, name: $0) }
+            }
+            .sorted { $0.name < $1.name }
+    }()
+
+    /// Codes floated to the top of the unfiltered picker — the countries this
+    /// audience most often calls home. Listed in the order they should appear.
+    static let popularCodes = ["ES", "PT", "FR", "DE", "IT", "IE", "GB", "NL", "BE", "CH"]
+
+    /// `all`, but with the popular countries first (in `popularCodes` order) and
+    /// everyone else alphabetically after. Used when no search query is active.
+    static let prioritized: [Country] = {
+        let popular = popularCodes.compactMap { code in all.first { $0.code == code } }
+        let rest = all.filter { !popularCodes.contains($0.code) }
+        return popular + rest
+    }()
+
+    static func name(for code: String) -> String {
+        all.first { $0.code == code }?.name ?? code
+    }
+
+    // MARK: Continents
+
+    private static let southAmericaCodes: Set<String> =
+        ["AR", "BO", "BR", "CL", "CO", "EC", "GY", "PY", "PE", "SR", "UY", "VE", "FK", "GF"]
+
+    /// Continent for an ISO code, resolved from the system region hierarchy
+    /// (Americas is split N/S). Cached.
+    static func continent(for code: String) -> Continent? {
+        continentByCode[code.uppercased()]
+    }
+
+    static let continentByCode: [String: Continent] = {
+        let continentIDs: Set<String> = ["002", "019", "142", "150", "009"]
+        var map: [String: Continent] = [:]
+        for country in all {
+            var region: Locale.Region? = Locale.Region(country.code)
+            while let r = region, !continentIDs.contains(r.identifier), r.identifier != "001" {
+                region = r.containingRegion
+            }
+            let continent: Continent?
+            switch region?.identifier {
+            case "002": continent = .africa
+            case "142": continent = .asia
+            case "150": continent = .europe
+            case "009": continent = .oceania
+            case "019": continent = southAmericaCodes.contains(country.code) ? .southAmerica : .northAmerica
+            default:    continent = nil
+            }
+            if let continent { map[country.code] = continent }
+        }
+        return map
+    }()
+
+    static func countries(in continent: Continent) -> [Country] {
+        all.filter { continentByCode[$0.code] == continent }
+    }
+}

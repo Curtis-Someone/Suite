@@ -43,6 +43,7 @@ struct ComponentGallery: View {
                             SuiteProgressBar(value: 0.62)
                             SuiteProgressBar(value: 0.4, height: 8)
                         }
+                        .id("mid")
 
                         group("Circular gauge") {
                             HStack(spacing: 22) {
@@ -80,6 +81,22 @@ struct ComponentGallery: View {
                             KickerLabel("4 results")
                         }
 
+                        group("Lucide icons (template-tinted)") {
+                            let all: [SuiteIcon] = [
+                                .chevronLeft, .chevronRight, .chevronDown, .chevronUp, .arrowLeft,
+                                .plus, .circlePlus, .check, .checkDouble, .circleCheck, .close,
+                                .search, .settings, .bell, .mapPin, .pin, .ellipsis, .calendar,
+                                .pencil, .pencilLine, .share, .filter, .funnel, .list, .listPlus,
+                                .user, .globe, .trash, .info, .bookOpen, .map, .contact, .luggage,
+                                .sun, .wind, .snowflake, .cloud, .cloudRain, .cloudSnow, .cloudSunRain,
+                            ]
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 8), spacing: 16) {
+                                ForEach(all, id: \.rawValue) { icon in
+                                    SuiteIconView(icon: icon, size: 24, color: Theme.Palette.textHeading)
+                                }
+                            }
+                        }
+
                         group("Stat block") {
                             StatBlock(
                                 title: "In total",
@@ -101,7 +118,11 @@ struct ComponentGallery: View {
                     .padding(.bottom, 40)
                 }
                 .onAppear {
-                    if startAtBottom { proxy.scrollTo("bottom", anchor: .bottom) }
+                    if ProcessInfo.processInfo.arguments.contains("-galleryMid") {
+                        proxy.scrollTo("mid", anchor: .top)
+                    } else if startAtBottom {
+                        proxy.scrollTo("bottom", anchor: .bottom)
+                    }
                 }
             }
 

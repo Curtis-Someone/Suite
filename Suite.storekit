@@ -1,0 +1,91 @@
+{
+  "identifier": "EC25722A-7559-44FF-8E85-68280C06BC43",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "42.99",
+      "familyShareable": false,
+      "internalID": "031B65AD-F0A4-4475-8413-5FD4B116FEA0",
+      "localizations": [
+        {
+          "description": "One payment. Every Pro feature, forever.",
+          "displayName": "Suite Pro \u2014 Lifetime",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.suiteapp.Suite.pro.lifetime",
+      "referenceName": "Pro Lifetime",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_applicationInternalID": "",
+    "_developerTeamID": "",
+    "_failTransactionsEnabled": false,
+    "_lastSynchronizedDate": 0,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [
+    {
+      "id": "67E21103-B258-4E1D-8FB1-5A3CD6715199",
+      "localizations": [],
+      "name": "Suite Pro",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "3.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "5F725B7B-11B4-44B6-8432-C27AE19FEBD9",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "Unlimited trips, templates, smart packing and more.",
+              "displayName": "Suite Pro \u2014 Monthly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.suiteapp.Suite.pro.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Pro Monthly",
+          "subscriptionGroupID": "67E21103-B258-4E1D-8FB1-5A3CD6715199",
+          "type": "RecurringSubscription",
+          "winbackOffers": []
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "24.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "2C568E78-3DA1-4F3D-9C71-661C5ED88EFF",
+          "introductoryOffer": {
+            "internalID": "286FA225-0C5A-47FF-BFC5-03F9CA9AFB95",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P5D"
+          },
+          "localizations": [
+            {
+              "description": "Everything in Pro. Best value \u2014 5 days free, then billed yearly.",
+              "displayName": "Suite Pro \u2014 Yearly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.suiteapp.Suite.pro.yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Pro Yearly",
+          "subscriptionGroupID": "67E21103-B258-4E1D-8FB1-5A3CD6715199",
+          "type": "RecurringSubscription",
+          "winbackOffers": []
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}
