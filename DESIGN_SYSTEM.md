@@ -37,6 +37,7 @@ dark artboards.
 | `track` | `#E0DCD4` | `#2E2E30` | Progress-bar track, inactive toggle |
 | `accent` | `#D09A42` | `#D09A42` | The one accent (unchanged both modes) |
 | `accentHigh` | `#E8B75F` | `#E8B75F` | Link hover / pressed emphasis |
+| `accentText` | `#8C5A1E` | `#D09A42` | Amber as **small/mid text** on light bg (brand amber is only ~2.5:1 there); resolves to brand amber in dark |
 | `onAccent` | `#0A0A0A` | `#0A0A0A` | Text/glyph on an amber fill (amber stays light) |
 | `textPrimary` | `#0A0A0A` | `#FFFFFF` | Primary text, display, CTA label on amber |
 | `textHeading` | `#14161A` | `#F2F0EC` | Dark-chrome text, line-icon strokes |
@@ -52,6 +53,24 @@ night-map treatment).
 Single-accent rule holds. **One deliberate exception** (from `CLAUDE.md` + compendium):
 full-colour category / flag icons on the Map and suitcase-builder screens carry identity
 information and stay multi-colour. Every other icon is monochrome at one stroke weight.
+
+---
+
+## 1a. Accessibility rules (apply to every screen)
+
+These are build rules, not a later polish pass — follow them as screens are built.
+
+1. **Amber as text.** Brand `accent` (`#D09A42`) is only ~2.5:1 on the light
+   backgrounds — never use it for text at body / label / caption size on light. Use
+   `accentText` for small and mid-size amber text; keep `accent` for fills, icon
+   colour, and large display numerals (≥ `statL`, e.g. the "10" in "10 / 195"), where
+   it sits behind or beside dark text and has enough size/weight to carry.
+2. **Never colour alone for state.** Anywhere colour signals a state — visited vs.
+   not-visited on the map, ready vs. not on a checklist, active vs. inactive on a
+   chip — pair it with a non-colour cue: a label, a checkmark, an icon, or a shape
+   change. A user who can't distinguish the two colours must still read the state.
+3. **Motion / timing.** Auto-dismissing overlays tie their duration to Reduce Motion
+   and to whether VoiceOver is running (see Batch 8) — never a single fixed timer.
 
 ---
 

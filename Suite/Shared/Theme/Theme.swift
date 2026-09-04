@@ -38,6 +38,13 @@ enum Theme {
         static let accent        = Color(hex: 0xD09A42)
         /// Hover / pressed emphasis for the accent (links).
         static let accentHigh    = Color(hex: 0xE8B75F)
+        /// Amber for use as **small / mid-size text** on the light backgrounds.
+        /// Brand `accent` (#D09A42) is only ~2.5:1 on `ground` / `surface`, below
+        /// the WCAG minimum for text — this darker value clears ~4.7:1 on
+        /// `#F5F3EF` and ~5.3:1 on white. In dark mode the brand amber already
+        /// passes, so this resolves back to it. Use `accent` for fills, icon
+        /// colour, and large display numerals only.
+        static let accentText    = Color(light: 0x8C5A1E, dark: 0xD09A42)
         /// Text / glyph colour on top of an amber fill (amber works in both modes).
         static let onAccent      = Color(hex: 0x0A0A0A)
 
