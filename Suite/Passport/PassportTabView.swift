@@ -49,7 +49,7 @@ struct PassportTabView: View {
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 8)
-                        .padding(.bottom, 100)
+                        .padding(.bottom, 120)   // clear the floating nav pill
                     }
                 }
             }

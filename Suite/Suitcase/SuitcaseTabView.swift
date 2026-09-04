@@ -125,7 +125,7 @@ struct SuitcaseTabView: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 18)
-                .padding(.bottom, 100)
+                .padding(.bottom, 120)   // clear the floating nav pill
             }
         }
     }
@@ -208,9 +208,9 @@ struct SuitcaseTabView: View {
                 .padding(.bottom, 24)
         }
         // This screen's NavigationStack doesn't take the shell's bottom safe-area
-        // inset, so clear the floating nav pill by hand — same 100pt the
-        // populated list and the Passport scroll already use.
-        .padding(.bottom, 76)
+        // inset, so clear the floating nav pill by hand — 96 + the button's own
+        // 24 matches the 120pt the populated list and the Passport scroll use.
+        .padding(.bottom, 96)
     }
 
     /// Amber card, luminosity-blended suitcase photo, dark bottom-up gradient,
