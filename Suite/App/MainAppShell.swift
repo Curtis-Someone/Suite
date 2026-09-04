@@ -16,16 +16,17 @@ struct MainAppShell: View {
     }()
 
     var body: some View {
-        VStack(spacing: 0) {
-            Group {
-                switch tab {
-                case .map:      MapTabView()
-                case .suitcase: SuitcaseTabView()
-                case .passport: PassportTabView()
-                }
+        Group {
+            switch tab {
+            case .map:      MapTabView()
+            case .suitcase: SuitcaseTabView()
+            case .passport: PassportTabView()
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // The pill floats *over* the content; `safeAreaInset` still reserves its
+        // footprint so scrollable content stops clear of it.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             BottomNavBar(selection: $tab)
         }
         .background(Theme.Palette.ground.ignoresSafeArea())

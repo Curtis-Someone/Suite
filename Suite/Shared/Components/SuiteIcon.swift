@@ -21,9 +21,8 @@ struct LucideIcon: View {
     }
 }
 
-/// Curated common icons. The three bottom-nav glyphs are the one exception —
-/// they stay custom in `BottomNavBar.swift` (bespoke shapes + filled active
-/// state a stroke icon can't do).
+/// Curated common icons. The bottom-nav tabs also use Lucide (`map` /
+/// `luggage` / `book-open`, tinted in code) — see `BottomNavBar.swift`.
 enum SuiteIcon: String {
     case chevronLeft   = "chevron-left"
     case chevronRight  = "chevron-right"

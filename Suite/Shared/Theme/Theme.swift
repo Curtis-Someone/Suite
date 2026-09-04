@@ -51,6 +51,27 @@ enum Theme {
 
         /// Destructive actions ("Log out", "Delete account").
         static let danger        = Color(light: 0xD96A4A, dark: 0xE07C5C)
+
+        // MARK: Floating nav pill
+        //
+        // Dedicated colour sets in `Assets.xcassets` (not `Color(light:dark:)`
+        // literals) so the v1.1 dark theme is a catalog edit, not new code.
+
+        /// Near-black `#14161A` — inactive tab glyphs, and the neutral
+        /// (colour-independent) highlight behind the active tab.
+        static let navInk        = Color("NavInk")
+        /// Text-safe amber `#97651B` — active tab icon + label. Darker and more
+        /// saturated than `accent`, which fails contrast at this size on the
+        /// cream ground (navAmber measures ~4.5:1 vs `ground` #F5F3EF; brand
+        /// amber only ~2.9:1).
+        static let navAmber      = Color("NavAmber")
+        /// Brand amber `#D09A42` catalog alias — large fills / icons / display
+        /// numerals only. Same value as `accent`; kept as a colour set so the
+        /// three pill colours live together in the catalog.
+        static let brandAmber    = Color("BrandAmber")
+        /// Low-opacity near-black wash behind the active tab item — structural,
+        /// not colour-signalled.
+        static let navHighlight  = Color("NavInk").opacity(0.08)
     }
 
     // MARK: Corner radii
@@ -90,7 +111,8 @@ enum Theme {
         /// Compact CTA (inside sheets / forms).
         static let ctaCompact: CGFloat = 54
         static let field: CGFloat      = 52
-        static let navBar: CGFloat     = 78
+        /// Floating glass nav pill — bar height (was a full-width 78pt strip).
+        static let navPill: CGFloat    = 56
         static let tabIcon: CGFloat    = 28
         /// Progress-bar thickness.
         static let progressBar: CGFloat = 10
