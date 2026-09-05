@@ -21,9 +21,11 @@ struct SettingsView: View {
             HStack(spacing: 16) {
                 Button { dismiss() } label: {
                     SuiteIconView(icon: .chevronLeft, size: 19, color: Theme.Palette.textPrimary)
-                        .frame(width: 42, height: 42)
-                        .overlay(Circle().strokeBorder(Theme.Palette.border))
+                        .frame(width: 44, height: 44)
+                        .overlay(Circle().strokeBorder(Theme.Palette.border).frame(width: 42, height: 42))
+                        .contentShape(Rectangle())
                 }
+                .accessibilityLabel("Back")
                 Text("Settings")
                     .font(.Suite.title).tracking(25 * -0.02)
                     .foregroundStyle(Theme.Palette.textPrimary)
@@ -74,7 +76,7 @@ struct SettingsView: View {
                         Button { exportTapped() } label: {
                             navRow("Export your data", value: entitlements.isPro ? nil : "Pro")
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.suitePress)
                     }
 
                     if auth.isSignedIn {
@@ -84,9 +86,10 @@ struct SettingsView: View {
                                     .font(.Suite.bodyStrong)
                                     .foregroundStyle(Theme.Palette.danger)
                                     .frame(maxWidth: .infinity)
-                                    .frame(height: 24)
+                                    .frame(height: 44)
+                                    .contentShape(Rectangle())
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(.suitePress)
                         }
                     }
                 }
@@ -144,7 +147,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.suitePress)
         }
     }
 
@@ -178,6 +181,8 @@ struct SettingsView: View {
             SuiteSwitch(isOn: isOn)
         }
         .frame(height: 56)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(title)
     }
 
     private var divider: some View { Rectangle().fill(Theme.Palette.divider).frame(height: 1) }

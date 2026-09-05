@@ -104,9 +104,11 @@ struct PackingChecklistView: View {
             HStack {
                 Button { dismiss() } label: {
                     SuiteIconView(icon: .chevronLeft, size: 19, color: Theme.Palette.textPrimary)
-                        .frame(width: 40, height: 40)
-                        .overlay(Circle().strokeBorder(Theme.Palette.border))
+                        .frame(width: 44, height: 44)
+                        .overlay(Circle().strokeBorder(Theme.Palette.border).frame(width: 40, height: 40))
+                        .contentShape(Rectangle())
                 }
+                .accessibilityLabel("Back")
                 Spacer()
                 Menu {
                     if !isDone {
@@ -117,8 +119,10 @@ struct PackingChecklistView: View {
                     Button("Save as template") { saveTemplateTapped() }
                 } label: {
                     SuiteIconView(icon: .ellipsis, size: 20, color: Theme.Palette.textPrimary)
-                        .frame(width: 40, height: 40)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
+                .accessibilityLabel("More options")
             }
 
             if isDone {
@@ -196,8 +200,11 @@ struct PackingChecklistView: View {
                         .foregroundStyle(packed == items.count ? Theme.Palette.textTertiary : Theme.Palette.accent)
                 }
                 .frame(height: 50)
+                .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.suitePress)
+            .accessibilityLabel("\(category.displayName), \(packed) of \(items.count) packed")
+            .accessibilityHint(isCollapsed ? "Expand section" : "Collapse section")
 
             if !isCollapsed {
                 ForEach(items) { item in
@@ -213,8 +220,10 @@ struct PackingChecklistView: View {
                             Spacer()
                         }
                         .frame(height: 44)
+                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.suitePress)
+                    .accessibilityLabel("Add item to \(category.displayName)")
                 }
             }
         }
@@ -224,7 +233,8 @@ struct PackingChecklistView: View {
     }
 
     private func row(_ item: Item) -> some View {
-        HStack(spacing: 12) {
+        let label = item.quantity > 1 ? "\(item.name) × \(item.quantity)" : item.name
+        return HStack(spacing: 12) {
             Button {
                 guard !isDone else { return }
                 let wasAllPacked = allPacked
@@ -244,13 +254,21 @@ struct PackingChecklistView: View {
                         }
                     }
                     .frame(width: 22, height: 22)
+                    .frame(width: 44, height: 44, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .padding(.trailing, -22)   // 44pt target without shifting the row
             }
             .buttonStyle(.plain)
+            .disabled(isDone)
+            .accessibilityLabel(label)
+            .accessibilityValue(item.isPacked ? "Packed" : "Not packed")
+            .accessibilityAddTraits(.isToggle)
 
-            Text(item.quantity > 1 ? "\(item.name) × \(item.quantity)" : item.name)
+            Text(label)
                 .font(.archivo(14, item.isPacked ? .regular : .medium))
                 .foregroundStyle(item.isPacked ? Theme.Palette.textTertiary : Theme.Palette.textPrimary)
                 .strikethrough(item.isPacked, color: Theme.Palette.textTertiary)
+                .accessibilityHidden(true)
 
             Spacer()
 
@@ -262,8 +280,11 @@ struct PackingChecklistView: View {
                     SuiteIconView(icon: .close, size: 12, color: Theme.Palette.textDisabled)
                         .frame(width: 26, height: 26)
                         .background(Theme.Palette.ground, in: RoundedRectangle(cornerRadius: 8))
+                        .frame(width: 44, height: 44, alignment: .trailing)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Delete \(label)")
             }
         }
         .frame(height: 46)

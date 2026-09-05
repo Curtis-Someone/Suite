@@ -27,7 +27,10 @@ struct ProBenefitsView: View {
             HStack {
                 Button { dismiss() } label: {
                     SuiteIconView(icon: .close, size: 20, color: Theme.Palette.textPrimary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
+                .accessibilityLabel("Close")
                 Spacer()
                 Text("Suite Pro").font(.archivo(18, .bold)).tracking(18 * -0.01)
                     .foregroundStyle(Theme.Palette.textHeading)
@@ -96,8 +99,10 @@ struct ProBenefitsView: View {
                 .overlay(alignment: .topLeading) {
                     Button { showPlans = false } label: {
                         SuiteIconView(icon: .close, size: 18, color: .white)
-                            .frame(width: 42, height: 42)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
+                    .accessibilityLabel("Close")
                     .padding(.leading, 12).padding(.top, 8)
                 }
         }

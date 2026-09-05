@@ -5,6 +5,8 @@ import SwiftUI
 struct SettingUpView: View {
     var onDone: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private let steps = ["Setting up your globe", "Loading your passport", "Packing your suitcase"]
     private let duration: Double = 1.8
 
@@ -43,7 +45,7 @@ struct SettingUpView: View {
                             .font(.archivo(16, .medium))
                             .foregroundStyle(i < stepsDone ? Theme.Palette.textHeading : Theme.Palette.textTertiary)
                     }
-                    .animation(.easeOut(duration: 0.2), value: stepsDone)
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: stepsDone)
                 }
             }
         }
@@ -54,6 +56,13 @@ struct SettingUpView: View {
     }
 
     private func fill() async {
+        if reduceMotion {
+            // No sweeping ring / counting number — hold briefly, then continue.
+            progress = 1
+            try? await Task.sleep(for: .seconds(0.8))
+            onDone()
+            return
+        }
         let stepCount = 48
         let interval = duration / Double(stepCount)
         for step in 1...stepCount {

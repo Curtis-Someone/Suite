@@ -92,9 +92,11 @@ struct PassportTabView: View {
             .overlay(alignment: .trailing) {
                 Button { showingAdd = true } label: {
                     SuiteIconView(icon: .plus, size: 20, color: Theme.Palette.textPrimary)
-                        .frame(width: 40, height: 40)
-                        .overlay(Circle().strokeBorder(Theme.Palette.border))
+                        .frame(width: 44, height: 44)
+                        .overlay(Circle().strokeBorder(Theme.Palette.border).frame(width: 40, height: 40))
+                        .contentShape(Rectangle())
                 }
+                .accessibilityLabel("Add place")
             }
 
             SegmentedToggle(
@@ -180,7 +182,7 @@ struct PassportTabView: View {
                     Button { path.append(row.continent) } label: {
                         continentRow(row.continent, visited: row.visited)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.suitePress)
                 }
             }
         }

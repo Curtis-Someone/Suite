@@ -29,13 +29,18 @@ struct ProfileView: View {
                 HStack {
                     Button { dismiss() } label: {
                         SuiteIconView(icon: .chevronLeft, size: 19, color: Theme.Palette.textPrimary)
-                            .frame(width: 42, height: 42)
-                            .overlay(Circle().strokeBorder(Theme.Palette.border))
+                            .frame(width: 44, height: 44)
+                            .overlay(Circle().strokeBorder(Theme.Palette.border).frame(width: 42, height: 42))
+                            .contentShape(Rectangle())
                     }
+                    .accessibilityLabel("Back")
                     Spacer()
                     NavigationLink { SettingsView() } label: {
                         SuiteIconView(icon: .settings, size: 22, color: Theme.Palette.textHeading)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
+                    .accessibilityLabel("Settings")
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 12)
@@ -69,10 +74,10 @@ struct ProfileView: View {
                         SuiteCard(padding: 4) {
                             VStack(spacing: 0) {
                                 Button { showShare = true } label: { menuRow("Share my passport") }
-                                    .buttonStyle(.plain)
+                                    .buttonStyle(.suitePress)
                                 Rectangle().fill(Theme.Palette.divider).frame(height: 1)
                                 NavigationLink { SettingsView() } label: { menuRow("Settings") }
-                                    .buttonStyle(.plain)
+                                    .buttonStyle(.suitePress)
                             }
                         }
 

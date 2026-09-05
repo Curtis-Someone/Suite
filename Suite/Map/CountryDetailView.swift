@@ -99,8 +99,10 @@ struct CountryDetailView: View {
                     .frame(height: 2)
             }
             .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.suitePress)
+        .accessibilityAddTraits(active ? [.isButton, .isSelected] : .isButton)
     }
 
     // MARK: rows
@@ -155,8 +157,12 @@ struct CountryDetailView: View {
                 .frame(width: 38, height: 38)
                 .background(on ? Theme.Palette.accent : Theme.Palette.fill,
                            in: RoundedRectangle(cornerRadius: 11))
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.suitePress)
+        .accessibilityLabel(icon == .flag ? "Visited" : "Want to go")
+        .accessibilityAddTraits(on ? [.isButton, .isSelected] : .isButton)
     }
 
     private func bigToggle(_ title: String, icon: SuiteIcon, on: Bool, action: @escaping () -> Void) -> some View {
@@ -173,7 +179,8 @@ struct CountryDetailView: View {
             .background(on ? Theme.Palette.accent : Theme.Palette.surfaceSunken, in: Capsule())
             .overlay(Capsule().strokeBorder(Theme.Palette.border, lineWidth: on ? 0 : 1))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.suitePress)
+        .accessibilityAddTraits(on ? [.isButton, .isSelected] : .isButton)
     }
 
     private func emptyRow(_ text: String) -> some View {

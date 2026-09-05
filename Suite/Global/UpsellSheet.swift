@@ -59,8 +59,10 @@ struct UpsellSheet: View {
                 .overlay(alignment: .topLeading) {
                     Button { showPlans = false; dismiss() } label: {
                         SuiteIconView(icon: .close, size: 18, color: .white)
-                            .frame(width: 42, height: 42)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
+                    .accessibilityLabel("Close")
                     .padding(.leading, 12).padding(.top, 8)
                 }
         }

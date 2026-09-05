@@ -14,9 +14,11 @@ struct ShareCardView: View {
             HStack(spacing: 16) {
                 Button { dismiss() } label: {
                     SuiteIconView(icon: .close, size: 18, color: Theme.Palette.textPrimary)
-                        .frame(width: 42, height: 42)
-                        .overlay(Circle().strokeBorder(Theme.Palette.border))
+                        .frame(width: 44, height: 44)
+                        .overlay(Circle().strokeBorder(Theme.Palette.border).frame(width: 42, height: 42))
+                        .contentShape(Rectangle())
                 }
+                .accessibilityLabel("Close")
                 Text("Share your passport")
                     .font(.Suite.titleS).tracking(22 * -0.02)
                     .foregroundStyle(Theme.Palette.textPrimary)

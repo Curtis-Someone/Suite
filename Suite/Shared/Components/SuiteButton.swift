@@ -35,7 +35,7 @@ struct SuiteButton: View {
             )
             .clipShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.suitePress)
         .disabled(!isEnabled)
     }
 

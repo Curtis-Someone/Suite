@@ -20,9 +20,11 @@ struct CountryListView: View {
             HStack(spacing: 14) {
                 Button { dismiss() } label: {
                     SuiteIconView(icon: .chevronLeft, size: 19, color: Theme.Palette.textPrimary)
-                        .frame(width: 40, height: 40)
-                        .overlay(Circle().strokeBorder(Theme.Palette.border))
+                        .frame(width: 44, height: 44)
+                        .overlay(Circle().strokeBorder(Theme.Palette.border).frame(width: 40, height: 40))
+                        .contentShape(Rectangle())
                 }
+                .accessibilityLabel("Back")
                 Text("My countries")
                     .font(.Suite.title).tracking(25 * -0.02)
                     .foregroundStyle(Theme.Palette.textPrimary)

@@ -24,6 +24,10 @@ struct SegmentedToggle<Option: Hashable>: View {
                     }
                     .contentShape(Rectangle())
                     .onTapGesture { selection = option.value }
+                    .accessibilityElement()
+                    .accessibilityLabel(option.title)
+                    .accessibilityAddTraits(isActive ? [.isButton, .isSelected] : .isButton)
+                    .accessibilityAction { selection = option.value }
             }
         }
         .padding(4)

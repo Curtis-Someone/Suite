@@ -6,6 +6,8 @@ import SwiftUI
 struct PurchaseConfirmationView: View {
     var onDone: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     @State private var badgeIn = false
     @State private var checkDraw = false
     @State private var pop = false
@@ -23,13 +25,15 @@ struct PurchaseConfirmationView: View {
 
                 ZStack {
                     // expanding pulse rings, kicked off when the check lands
-                    ForEach(0..<2) { i in
-                        Circle()
-                            .stroke(.white, lineWidth: 2)
-                            .frame(width: badge, height: badge)
-                            .scaleEffect(pulse ? 2.1 : 1)
-                            .opacity(pulse ? 0 : 0.45)
-                            .animation(.easeOut(duration: 1.0).delay(Double(i) * 0.12), value: pulse)
+                    if !reduceMotion {
+                        ForEach(0..<2) { i in
+                            Circle()
+                                .stroke(.white, lineWidth: 2)
+                                .frame(width: badge, height: badge)
+                                .scaleEffect(pulse ? 2.1 : 1)
+                                .opacity(pulse ? 0 : 0.45)
+                                .animation(.easeOut(duration: 1.0).delay(Double(i) * 0.12), value: pulse)
+                        }
                     }
 
                     Circle()
@@ -84,6 +88,13 @@ struct PurchaseConfirmationView: View {
     }
 
     private func play() {
+        guard !reduceMotion else {
+            // No zoom / pop / pulse — badge and copy just fade in.
+            badgeIn = true
+            checkDraw = true
+            withAnimation(.easeOut(duration: 0.25)) { textIn = true }
+            return
+        }
         withAnimation(.spring(response: 0.44, dampingFraction: 0.58)) { badgeIn = true }
         withAnimation(.easeOut(duration: 0.34).delay(0.24)) { checkDraw = true }
         // one-shot pop as the check completes

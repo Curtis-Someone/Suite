@@ -44,6 +44,7 @@ struct MapTabView: View {
                             .background(Theme.Palette.surface.opacity(0.94), in: Circle())
                             .overlay(Circle().strokeBorder(Theme.Palette.border))
                     }
+                    .accessibilityLabel("Centre on my location")
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
@@ -64,6 +65,9 @@ struct MapTabView: View {
                         .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
                         .environment(\.colorScheme, .dark)   // dark frost over the always-dark map
                     }
+                    .accessibilityLabel("Map display")
+                    .accessibilityValue(mode.label)
+                    .accessibilityHint("Switch between countries and cities")
                     Spacer()
                     Button { showingAdd = true } label: {
                         SuiteIconView(icon: .plus, size: 24, color: Theme.Palette.onAccent)
@@ -71,6 +75,7 @@ struct MapTabView: View {
                             .background(Theme.Palette.accent, in: Circle())
                             .shadow(color: .black.opacity(0.14), radius: 10, y: 4)
                     }
+                    .accessibilityLabel("Add a visited place")
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 20)

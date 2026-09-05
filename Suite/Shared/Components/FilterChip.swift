@@ -15,7 +15,10 @@ struct FilterChip: View {
                 .padding(.horizontal, 15)
                 .frame(height: 32)
                 .background(isActive ? Theme.Palette.accent : Theme.Palette.surfaceSunken, in: Capsule())
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.suitePress)
+        .accessibilityAddTraits(isActive ? [.isButton, .isSelected] : .isButton)
     }
 }

@@ -54,9 +54,11 @@ struct NewSuitcaseFlow: View {
                 if step == .activities { withAnimation { step = .basics } } else { dismiss() }
             } label: {
                 SuiteIconView(icon: .chevronLeft, size: 19, color: Theme.Palette.textPrimary)
-                    .frame(width: 40, height: 40)
-                    .overlay(Circle().strokeBorder(Theme.Palette.border))
+                    .frame(width: 44, height: 44)
+                    .overlay(Circle().strokeBorder(Theme.Palette.border).frame(width: 40, height: 40))
+                    .contentShape(Rectangle())
             }
+            .accessibilityLabel(step == .activities ? "Back" : "Close")
             Spacer()
             Dots(count: 2, active: step == .basics ? 0 : 1)
             Spacer()

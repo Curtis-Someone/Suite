@@ -40,6 +40,7 @@ struct SuitcaseTabView: View {
                             .background(Theme.Palette.accent, in: Circle())
                             .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
                     }
+                    .accessibilityLabel("New suitcase")
                     .padding(.trailing, 24)
                     .padding(.bottom, 20)
                 }
@@ -85,10 +86,16 @@ struct SuitcaseTabView: View {
             Spacer()
             Button { showingSearch = true } label: {
                 SuiteIconView(icon: .search, size: 24, color: Theme.Palette.textBody)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
+            .accessibilityLabel("Search")
             Button { showingProfile = true } label: {
                 SuiteIconView(icon: .user, size: 28, color: Theme.Palette.textBody)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
+            .accessibilityLabel("Profile")
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 24)
@@ -133,7 +140,8 @@ struct SuitcaseTabView: View {
 
     private func link(_ trip: Trip) -> some View {
         NavigationLink(value: trip) { TripCardView(trip: trip) }
-            .buttonStyle(.plain)
+            .buttonStyle(.suitePress)
+            .accessibilityHint("Opens the packing checklist")
     }
 
     private var addCard: some View {
@@ -152,7 +160,7 @@ struct SuitcaseTabView: View {
                     .foregroundStyle(Theme.Palette.border)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.suitePress)
     }
 
     private var packingTip: some View {
