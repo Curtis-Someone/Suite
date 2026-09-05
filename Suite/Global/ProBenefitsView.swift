@@ -4,6 +4,7 @@ import SwiftUI
 /// pricing screen. "See plans" opens `PaywallView`.
 struct ProBenefitsView: View {
     @Environment(\.dismiss) private var dismiss
+    private let entitlements = Entitlements.shared
     @State private var page = 0
     @State private var showPlans = false
 
@@ -87,6 +88,9 @@ struct ProBenefitsView: View {
             .padding(.bottom, 40)
         }
         .background(Theme.Palette.ground.ignoresSafeArea())
+        .onChange(of: showPlans) { _, showing in
+            if !showing && entitlements.isPro { dismiss() }
+        }
         .fullScreenCover(isPresented: $showPlans) {
             PaywallView()
                 .overlay(alignment: .topLeading) {

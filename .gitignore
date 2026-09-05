@@ -3,3 +3,6 @@
 *.xcuserstate
 xcuserdata/
 DerivedData/
+
+# local xcodebuild output
+build/

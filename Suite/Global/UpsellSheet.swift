@@ -5,6 +5,7 @@ import SwiftUI
 struct UpsellSheet: View {
     let moment: UpsellMoment
     @Environment(\.dismiss) private var dismiss
+    private let entitlements = Entitlements.shared
     @State private var showPlans = false
 
     var body: some View {
@@ -50,6 +51,9 @@ struct UpsellSheet: View {
         .background(Theme.Palette.ground.ignoresSafeArea())
         .presentationDetents([.height(420)])
         .presentationDragIndicator(.visible)
+        .onChange(of: showPlans) { _, showing in
+            if !showing && entitlements.isPro { dismiss() }
+        }
         .fullScreenCover(isPresented: $showPlans) {
             PaywallView()
                 .overlay(alignment: .topLeading) {

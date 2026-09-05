@@ -4,7 +4,7 @@ import SwiftData
 /// 11 · Passport tab — travel stats over `VisitedPlace`, plus a Trips log.
 struct PassportTabView: View {
     @Environment(\.modelContext) private var context
-    @Environment(Entitlements.self) private var entitlements
+    private let entitlements = Entitlements.shared
     @Query private var visits: [VisitedPlace]
     @Query(sort: \Trip.endDate, order: .reverse) private var allTrips: [Trip]
     @State private var didSeed = false

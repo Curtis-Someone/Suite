@@ -15,6 +15,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Suite.storekit,
 			);
 			target = 000000000000000000000005 /* Suite */;
 		};

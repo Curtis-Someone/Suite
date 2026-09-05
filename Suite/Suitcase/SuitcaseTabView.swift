@@ -4,7 +4,7 @@ import SwiftData
 /// Suitcase tab — empty state, or the Upcoming / Past trip list.
 struct SuitcaseTabView: View {
     @Environment(\.modelContext) private var context
-    @Environment(Entitlements.self) private var entitlements
+    private let entitlements = Entitlements.shared
     @Query(sort: \Trip.startDate) private var trips: [Trip]
     @State private var showingBuilder = false
     @State private var showingProfile = false
@@ -66,6 +66,7 @@ struct SuitcaseTabView: View {
         if args.contains("-seedOne") && trips.isEmpty {
             SampleData.seedOneTrip(into: context)
         }
+        if args.contains("-openProfile") { showingProfile = true }
         if args.contains("-openBuilder") {
             showingBuilder = true
         } else if let i = args.firstIndex(of: "-openChecklist"), i + 1 < args.count {

@@ -21,8 +21,10 @@ struct ProfileView: View {
     }
     private var stats: PassportStats { PassportStats(visits: visits) }
 
+    @State private var devPath: [String] = ProcessInfo.processInfo.arguments.contains("-openSettings") ? ["settings"] : []
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $devPath) {
             VStack(spacing: 0) {
                 HStack {
                     Button { dismiss() } label: {
@@ -85,6 +87,7 @@ struct ProfileView: View {
             }
             .background(Theme.Palette.ground.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(for: String.self) { _ in SettingsView() }
         }
         .sheet(isPresented: $showShare) { ShareCardView() }
     }

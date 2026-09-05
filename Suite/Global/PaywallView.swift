@@ -6,15 +6,26 @@ import StoreKit
 /// Restore. Prices come from StoreKit when loaded, else the CLAUDE.md fallbacks.
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(Entitlements.self) private var entitlements
+    private let entitlements = Entitlements.shared
     @Query private var visits: [VisitedPlace]
 
     @State private var plan: ProductID = .proYearly
     @State private var working = false
+    @State private var loadError = false
+    @State private var purchased = false
 
     private var visitedCodes: Set<String> { Set(visits.map { $0.countryCode.uppercased() }) }
 
     var body: some View {
+        if purchased {
+            PurchaseConfirmationView { dismiss() }
+                .transition(.opacity)
+        } else {
+            paywall
+        }
+    }
+
+    private var paywall: some View {
         ZStack(alignment: .top) {
             Theme.Palette.ground.ignoresSafeArea()
 
@@ -33,7 +44,7 @@ struct PaywallView: View {
 
             Button {
                 Task { working = true; await entitlements.restore(); working = false
-                    if entitlements.isPro { dismiss() } }
+                    if entitlements.isPro { withAnimation { purchased = true } } }
             } label: {
                 Text("Already purchased? Restore")
                     .font(.archivo(13, .semibold))
@@ -65,12 +76,21 @@ struct PaywallView: View {
                 Spacer(minLength: 20)
 
                 Button {
-                    guard let product = entitlements.product(for: plan) else { return }
                     Task {
                         working = true
+                        if entitlements.product(for: plan) == nil { await entitlements.loadProducts() }
+                        guard let product = entitlements.product(for: plan) else {
+                            working = false
+                            loadError = true
+                            return
+                        }
                         let ok = await entitlements.purchase(product)
                         working = false
-                        if ok || entitlements.isPro { dismiss() }
+                        if entitlements.isPro {
+                            withAnimation { purchased = true }   // → confirmation screen
+                        } else if ok {
+                            dismiss()                            // pending family approval
+                        }
                     }
                 } label: {
                     ZStack {
@@ -97,6 +117,11 @@ struct PaywallView: View {
         }
         .task {
             if entitlements.products.isEmpty { await entitlements.loadProducts() }
+        }
+        .alert("Plans unavailable", isPresented: $loadError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Couldn't load the plans from the App Store. In the Simulator this needs a StoreKit Configuration set on the scheme (Edit Scheme → Run → Options → StoreKit Configuration → Suite.storekit).")
         }
     }
 

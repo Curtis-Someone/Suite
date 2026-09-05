@@ -6,7 +6,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Environment(AuthService.self) private var auth
-    @Environment(Entitlements.self) private var entitlements
+    private let entitlements = Entitlements.shared
 
     @Query private var settingsList: [UserSettings]
     @State private var askNotifications = false
