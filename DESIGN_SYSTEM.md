@@ -45,6 +45,15 @@ dark artboards.
 | `textTertiary` | `#8F8B84` | `#6E6A64` | Labels, captions, inactive icon stroke |
 | `textDisabled` | `#B4B0A8` | `#57534D` | Disabled text |
 | `danger` | `#D96A4A` | `#E07C5C` | Destructive ("Log out", "Delete account") |
+| `navInk` | `#14161A` | `#F2F0EC` | Floating nav pill — inactive glyphs + active highlight (Asset catalog) |
+| `navAmber` | `#97651B` | `#E8B75F` | Nav pill — active tab icon + label; text-safe amber, ~4.5:1 on cream (Asset catalog) |
+| `brandAmber` | `#D09A42` | `#D09A42` | `accent` alias as a colour set — large fills / numerals only (Asset catalog) |
+
+**Colour sets vs. code tokens.** Most tokens are `Color(light:dark:)` literals in
+`Theme.swift`. The three nav-pill colours are the exception — real `.colorset`s in
+`Assets.xcassets` (`NavInk`, `NavAmber`, `BrandAmber`) with dark variants stubbed,
+so the v1.1 dark theme is a catalog edit rather than new code. `navHighlight` is
+`navInk` at 8% opacity.
 
 The auth-screen hero panel is a fixed `#0A0A0A` in **both** modes (deliberate
 night-map treatment).
@@ -124,8 +133,8 @@ Screen chrome: content typically starts ~56–64 px from the top edge; primary C
 | `cta` | 58 | Full-width primary CTA on a screen (radius = capsule, 29) |
 | `ctaCompact` | 54 | CTA inside a form / sheet (radius 27) |
 | `field` | 52 | Input row (single fields render 50–56; grouped rows 50–52) |
-| `navBar` | 78 | Bottom nav: `surface` bg, 1px `fillStrong` top border, 3 icons `space-around`, 16px top padding |
-| `tabIcon` | 28 | Nav-bar icon box |
+| `navPill` | 56 | Floating glass nav pill height — capsule, `.ultraThinMaterial`, 0.5px white hairline, soft shadow; 24px side margins, 16px above the bottom safe area |
+| `tabIcon` | 28 | Nav-bar icon box (pill glyphs render at 22) |
 | `progressBar` | 10 | Track height; radius 5; amber fill; also used per-row at 8px |
 
 Circular gauge: SVG ring, `track` under-stroke + `accent` over-stroke, stroke width ~11–12,
@@ -156,8 +165,12 @@ Circular gauge: SVG ring, `track` under-stroke + `accent` over-stroke, stroke wi
   (`Country.flag`, from Unicode regional-indicator symbols), OS-rendered at ~26pt,
   no fill or border. Selected/visited state reads from the row, not the chip.
   Missing-flag fallback: `track` fill + `textDisabled` glyph.
-- **Bottom nav** — exactly 3 icons, order **map · suitcase · passport**; active icon
-  filled `accent` with `onAccent` interior detail; inactive stroked `textTertiary`.
+- **Bottom nav** — floating glass pill (`.ultraThinMaterial` capsule, 0.5px white
+  hairline, soft shadow), 3 tabs in order **map · suitcase · passport**. Inactive:
+  Lucide glyph only, `navInk` at 55%. Active: glyph **+ label** side by side on a
+  `navHighlight` capsule (neutral, colour-independent — like visited/not-visited on
+  the Passport), both tinted `navAmber`. Selection change animates `.snappy`,
+  suppressed under Reduce Motion. Optional brand-amber badge dot, top-right of a glyph.
 - **Selected checkmark** — `accent` filled circle, `onAccent` tick.
 - **Toggle switch** — 50×30 capsule; on = `accent` track + white knob; off = `track` +
   `textTertiary` knob.
@@ -171,10 +184,9 @@ Circular gauge: SVG ring, `track` under-stroke + `accent` over-stroke, stroke wi
 closer to the canvas `sw`). Accessed via `SuiteIcon` / `SuiteIconView`, which tints with
 `.foregroundStyle`. Round caps/joins, no fill.
 
-**One exception — the bottom-nav glyphs** (`BottomNavBar.swift`): map / suitcase /
-passport stay hand-drawn `Path`s. The design draws them bespoke (the map is 3 overlapping
-panels, not Lucide's folded `map`) with a **filled amber active state** a stroke icon
-can't do. Every other icon in the app is Lucide.
+The bottom-nav tabs are Lucide too — `map` / `luggage` / `book-open`, template-mode
+and tinted in code (`BottomNavBar.swift`). The active state is now structural (label
+reveal + neutral capsule), so the old bespoke filled-amber glyphs are retired.
 
 Full-colour category / flag icons on Map + suitcase-builder screens are a separate,
 deliberate multi-colour exception (§1).
