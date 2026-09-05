@@ -15,6 +15,7 @@ struct PackingChecklistView: View {
     @State private var newItemName = ""
     @State private var upsell: UpsellMoment?
     @State private var templateSaved = false
+    @State private var showExport = false
 
     private var suitcase: Suitcase? { trip.suitcases.first }
     private var isDone: Bool { trip.isArchived }
@@ -64,6 +65,9 @@ struct PackingChecklistView: View {
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
         .task { await WeatherService.refresh(for: trip, in: context) }
+        .task {
+            if ProcessInfo.processInfo.arguments.contains("-exportPDF") { showExport = true }
+        }
         .alert("Add item", isPresented: Binding(get: { addingTo != nil }, set: { if !$0 { addingTo = nil } })) {
             TextField("Item name", text: $newItemName)
             Button("Add") { addItem() }
@@ -72,6 +76,7 @@ struct PackingChecklistView: View {
             if let addingTo { Text(addingTo.displayName) }
         }
         .sheet(item: $upsell) { UpsellSheet(moment: $0) }
+        .sheet(isPresented: $showExport) { TripExportSheet(trip: trip) }
         .alert("Saved to templates", isPresented: $templateSaved) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -82,6 +87,13 @@ struct PackingChecklistView: View {
     private func saveTemplateTapped() {
         switch PackingGate.canSaveTemplate(isPro: entitlements.isPro) {
         case .allowed:             saveTemplate()
+        case .blocked(let reason): upsell = reason
+        }
+    }
+
+    private func exportTapped() {
+        switch PackingGate.canExport(isPro: entitlements.isPro) {
+        case .allowed:             showExport = true
         case .blocked(let reason): upsell = reason
         }
     }
@@ -115,6 +127,7 @@ struct PackingChecklistView: View {
                         Button("Reopen trip") { trip.isArchived = false; try? context.save() }
                     }
                     Button("Save as template") { saveTemplateTapped() }
+                    Button("Export as PDF") { exportTapped() }
                 } label: {
                     SuiteIconView(icon: .ellipsis, size: 20, color: Theme.Palette.textPrimary)
                         .frame(width: 40, height: 40)

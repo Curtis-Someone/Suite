@@ -45,6 +45,8 @@ struct RootView: View {
         case "reward4":      return AnyView(RewardDemo(.init(kind: .milestone, title: "10 countries.", message: "5% of the world. Keep the passport moving.")))
         case "paywall":      return AnyView(PaywallView())
         case "purchaseDone": return AnyView(PurchaseConfirmationView {})
+        case "exportDoc":    return AnyView(ScrollView { PackingListDocument.sample })
+        case "dataExport":   return AnyView(Color.clear.sheet(isPresented: .constant(true)) { DataExportSheet() })
         case "proBenefits":  return AnyView(ProBenefitsView())
         case "upsellTrip":   return AnyView(Color.black.opacity(0.3).ignoresSafeArea().sheet(isPresented: .constant(true)) { UpsellSheet(moment: .thirdActiveTrip) })
         default:             return nil

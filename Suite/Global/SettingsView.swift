@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var askNotifications = false
     @State private var confirmSignOut = false
     @State private var showPro = false
+    @State private var showDataExport = false
     @State private var upsell: UpsellMoment?
 
     private var settings: UserSettings { settingsList.first ?? UserSettings.current(in: context) }
@@ -101,6 +102,7 @@ struct SettingsView: View {
             PermissionView(kind: .notifications) {}
         }
         .sheet(item: $upsell) { UpsellSheet(moment: $0) }
+        .sheet(isPresented: $showDataExport) { DataExportSheet() }
         .fullScreenCover(isPresented: $showPro) { ProBenefitsView() }
         .confirmationDialog("Log out of Suite?", isPresented: $confirmSignOut, titleVisibility: .visible) {
             Button("Log out", role: .destructive) { auth.signOut(context: context) }
@@ -109,7 +111,7 @@ struct SettingsView: View {
 
     private func exportTapped() {
         switch PackingGate.canExport(isPro: entitlements.isPro) {
-        case .allowed:             break   // real PDF / Messages export lands in Batch 11
+        case .allowed:             showDataExport = true
         case .blocked(let reason): upsell = reason
         }
     }
