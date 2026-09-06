@@ -55,7 +55,7 @@ struct ShareCardView: View {
 
     private var card: some View {
         ZStack {
-            WorldMapView(visited: visitedCodes, interactive: false)
+            WorldMapView(visited: visitedCodes, interactive: false, scheme: .dark)
                 .allowsHitTesting(false)
             LinearGradient(colors: [.black.opacity(0.55), .black.opacity(0.2), .black.opacity(0.92)],
                            startPoint: .top, endPoint: .bottom)

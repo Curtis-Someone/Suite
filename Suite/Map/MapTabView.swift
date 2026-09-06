@@ -26,7 +26,7 @@ struct MapTabView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: 0x0E1012).ignoresSafeArea()
+            Color(light: 0xF5F3EF, dark: 0x0E1012).ignoresSafeArea()
 
             WorldMapView(visited: visitedCodes,
                          wishlist: wishlistCodes,
@@ -53,17 +53,16 @@ struct MapTabView: View {
                 HStack(alignment: .bottom) {
                     Button { showingToggle = true } label: {
                         HStack(spacing: 10) {
-                            LucideIcon(name: mode.iconName, size: 18, color: .white)
+                            LucideIcon(name: mode.iconName, size: 18, color: Theme.Palette.textHeading)
                             Text(mode.label)
                                 .font(.archivo(14, .semibold))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Theme.Palette.textHeading)
                         }
                         .padding(.horizontal, 18)
                         .frame(height: 44)
                         .background(.ultraThinMaterial, in: Capsule())
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.18)))
-                        .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
-                        .environment(\.colorScheme, .dark)   // dark frost over the always-dark map
+                        .overlay(Capsule().strokeBorder(Theme.Palette.border))
+                        .shadow(color: .black.opacity(0.12), radius: 8, y: 3)
                     }
                     Spacer()
                     Button { showingAdd = true } label: {
