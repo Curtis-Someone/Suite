@@ -18,13 +18,15 @@ struct MainAppShell: View {
     var body: some View {
         // A paged TabView so a horizontal finger-swipe moves between tabs;
         // the custom pill stays the visible control, bound to the same selection.
+        // The top safe area is left intact so each tab's own header stays below
+        // the status bar and keeps its tap targets; Map bleeds to the top edge
+        // via its own `.ignoresSafeArea()` on the map and background layers.
         TabView(selection: $tab) {
             MapTabView().tag(SuiteTab.map)
             SuitcaseTabView().tag(SuiteTab.suitcase)
             PassportTabView().tag(SuiteTab.passport)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
-        .ignoresSafeArea(edges: .top)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             BottomNavBar(selection: $tab)
