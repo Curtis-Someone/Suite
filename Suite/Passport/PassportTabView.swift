@@ -95,6 +95,7 @@ struct PassportTabView: View {
                         .frame(width: 40, height: 40)
                         .overlay(Circle().strokeBorder(Theme.Palette.border))
                 }
+                .accessibilityLabel("Add a place you've visited")
             }
 
             SegmentedToggle(

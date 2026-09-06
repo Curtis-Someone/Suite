@@ -44,6 +44,7 @@ struct MapTabView: View {
                             .background(Theme.Palette.surface.opacity(0.94), in: Circle())
                             .overlay(Circle().strokeBorder(Theme.Palette.border))
                     }
+                    .accessibilityLabel("Fill in my location")
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
@@ -71,6 +72,7 @@ struct MapTabView: View {
                             .background(Theme.Palette.accent, in: Circle())
                             .shadow(color: .black.opacity(0.14), radius: 10, y: 4)
                     }
+                    .accessibilityLabel("Add a place you've visited")
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 20)

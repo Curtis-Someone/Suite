@@ -119,6 +119,7 @@ struct PackingChecklistView: View {
                         .frame(width: 40, height: 40)
                         .overlay(Circle().strokeBorder(Theme.Palette.border))
                 }
+                .accessibilityLabel("Back")
                 Spacer()
                 Menu {
                     if !isDone {
@@ -132,6 +133,7 @@ struct PackingChecklistView: View {
                     SuiteIconView(icon: .ellipsis, size: 20, color: Theme.Palette.textPrimary)
                         .frame(width: 40, height: 40)
                 }
+                .accessibilityLabel("Trip options")
             }
 
             if isDone {
@@ -259,6 +261,9 @@ struct PackingChecklistView: View {
                     .frame(width: 22, height: 22)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(item.name)
+            .accessibilityValue(item.isPacked ? "Packed" : "Not packed")
+            .accessibilityAddTraits(item.isPacked ? [.isButton, .isSelected] : .isButton)
 
             Text(item.quantity > 1 ? "\(item.name) × \(item.quantity)" : item.name)
                 .font(.archivo(14, item.isPacked ? .regular : .medium))
@@ -277,6 +282,7 @@ struct PackingChecklistView: View {
                         .background(Theme.Palette.ground, in: RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Remove \(item.name)")
             }
         }
         .frame(height: 46)

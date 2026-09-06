@@ -32,10 +32,12 @@ struct ProfileView: View {
                             .frame(width: 42, height: 42)
                             .overlay(Circle().strokeBorder(Theme.Palette.border))
                     }
+                    .accessibilityLabel("Close")
                     Spacer()
                     NavigationLink { SettingsView() } label: {
                         SuiteIconView(icon: .settings, size: 22, color: Theme.Palette.textHeading)
                     }
+                    .accessibilityLabel("Settings")
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 12)

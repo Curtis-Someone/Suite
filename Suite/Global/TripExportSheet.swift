@@ -18,6 +18,7 @@ struct TripExportSheet: View {
                         .frame(width: 42, height: 42)
                         .overlay(Circle().strokeBorder(Theme.Palette.border))
                 }
+                .accessibilityLabel("Close")
                 Text("Export packing list")
                     .font(.Suite.titleS).tracking(22 * -0.02)
                     .foregroundStyle(Theme.Palette.textPrimary)

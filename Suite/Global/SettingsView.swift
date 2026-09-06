@@ -25,6 +25,7 @@ struct SettingsView: View {
                         .frame(width: 42, height: 42)
                         .overlay(Circle().strokeBorder(Theme.Palette.border))
                 }
+                .accessibilityLabel("Back")
                 Text("Settings")
                     .font(.Suite.title).tracking(25 * -0.02)
                     .foregroundStyle(Theme.Palette.textPrimary)

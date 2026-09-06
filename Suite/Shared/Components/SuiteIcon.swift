@@ -18,6 +18,7 @@ struct LucideIcon: View {
             .scaledToFit()
             .frame(width: size, height: size)
             .foregroundStyle(color)
+            .accessibilityHidden(true)   // decorative; icon-only buttons label themselves
     }
 }
 

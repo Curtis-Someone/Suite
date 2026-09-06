@@ -40,6 +40,7 @@ struct SuitcaseTabView: View {
                             .background(Theme.Palette.accent, in: Circle())
                             .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
                     }
+                    .accessibilityLabel("New suitcase")
                     .padding(.trailing, 24)
                     .padding(.bottom, 20)
                 }
@@ -86,9 +87,11 @@ struct SuitcaseTabView: View {
             Button { showingSearch = true } label: {
                 SuiteIconView(icon: .search, size: 24, color: Theme.Palette.textBody)
             }
+            .accessibilityLabel("Search")
             Button { showingProfile = true } label: {
                 SuiteIconView(icon: .user, size: 28, color: Theme.Palette.textBody)
             }
+            .accessibilityLabel("Profile")
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 24)

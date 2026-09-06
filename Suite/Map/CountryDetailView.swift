@@ -143,7 +143,11 @@ struct CountryDetailView: View {
             }
             Spacer()
             quickToggle(icon: .flag, on: visited, action: toggleVisited)
+                .accessibilityLabel("\(title) visited")
+                .accessibilityAddTraits(visited ? [.isButton, .isSelected] : .isButton)
             quickToggle(icon: .heart, on: wanted, action: toggleWanted)
+                .accessibilityLabel("\(title) on my want-to-go list")
+                .accessibilityAddTraits(wanted ? [.isButton, .isSelected] : .isButton)
         }
         .padding(.horizontal, 24)
         .frame(height: 62)
