@@ -77,7 +77,10 @@ struct WorldMapView: View {
                 }
             }
             .contentShape(Rectangle())
-            .gesture(interactive ? mapGesture : nil)
+            .gesture(interactive ? pinchGesture : nil)
+            // One-finger pan only once the user has zoomed in — otherwise a
+            // horizontal drag belongs to the tab-swipe, not the map.
+            .gesture((interactive && zoom * pinch > 3.4) ? panGesture : nil)
             .onTapGesture { loc in
                 guard interactive, focus == nil, let onTapCountry else { return }
                 let unit = loc.applying(t.inverted())
@@ -91,15 +94,16 @@ struct WorldMapView: View {
 
     // MARK: Gestures
 
-    private var mapGesture: some Gesture {
-        SimultaneousGesture(
-            MagnificationGesture()
-                .updating($pinch) { value, state, _ in state = value }
-                .onEnded { zoom = min(24, max(1.6, zoom * $0)) },
-            DragGesture()
-                .updating($drag) { value, state, _ in state = value.translation }
-                .onEnded { pan.width += $0.translation.width; pan.height += $0.translation.height }
-        )
+    private var pinchGesture: some Gesture {
+        MagnificationGesture()
+            .updating($pinch) { value, state, _ in state = value }
+            .onEnded { zoom = min(24, max(1.6, zoom * $0)) }
+    }
+
+    private var panGesture: some Gesture {
+        DragGesture(minimumDistance: 8)
+            .updating($drag) { value, state, _ in state = value.translation }
+            .onEnded { pan.width += $0.translation.width; pan.height += $0.translation.height }
     }
 
     // MARK: Projection → view
