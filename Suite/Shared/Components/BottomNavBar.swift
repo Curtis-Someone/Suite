@@ -13,14 +13,14 @@ enum SuiteTab: CaseIterable {
         }
     }
 
-    /// Lucide asset name (`Assets.xcassets/Lucide/`), imported template-mode so
-    /// the tint is applied in code. One consistent 1.75 stroke, like every other
-    /// icon in the app.
+    /// Asset name, imported template-mode so the tint is applied in code.
+    /// `map` is the Lucide glyph; `suitcase` / `passport` are the custom
+    /// line-art tab glyphs in `Assets.xcassets/Nav/`.
     var iconName: String {
         switch self {
         case .map:      "map"
-        case .suitcase: "luggage"
-        case .passport: "book-open"
+        case .suitcase: "suitcase"
+        case .passport: "passport"
         }
     }
 }
