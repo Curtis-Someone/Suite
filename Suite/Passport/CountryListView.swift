@@ -42,13 +42,14 @@ struct CountryListView: View {
                             Text(row.country.name)
                                 .font(.archivo(15, .medium))
                                 .foregroundStyle(Theme.Palette.textPrimary)
-                            Spacer()
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 8)
                             Text(row.count == 1 ? "1 visit" : "\(row.count) visits")
                                 .font(.Suite.data)
                                 .foregroundStyle(Theme.Palette.textTertiary)
                         }
                         .padding(.horizontal, 16)
-                        .frame(height: 56)
+                        .frame(minHeight: 56)
                         .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 14))
                         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.Palette.border))
                     }
@@ -60,5 +61,6 @@ struct CountryListView: View {
         .background(Theme.Palette.ground.ignoresSafeArea())
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        .keepsSwipeBack()
     }
 }

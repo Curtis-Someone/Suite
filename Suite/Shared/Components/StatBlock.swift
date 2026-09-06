@@ -22,9 +22,13 @@ struct StatColumn: View {
                         .foregroundStyle(Theme.Palette.textPrimary)
                 }
             }
+            // Oversized display numbers shrink rather than wrap at large text sizes.
+            .lineLimit(1)
+            .minimumScaleFactor(0.4)
             Text(caption)
                 .font(.archivo(12))
                 .foregroundStyle(Theme.Palette.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

@@ -27,7 +27,7 @@ struct SuiteButton: View {
             }
             .foregroundStyle(foreground)
             .frame(maxWidth: .infinity)
-            .frame(height: height)
+            .frame(minHeight: height)
             .background(background)
             .overlay(
                 Capsule().strokeBorder(Theme.Palette.textPrimary,

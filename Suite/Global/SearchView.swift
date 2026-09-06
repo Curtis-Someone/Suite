@@ -63,13 +63,16 @@ struct SearchView: View {
                         .tint(Theme.Palette.accent)
                 }
                 .padding(.horizontal, 18)
-                .frame(height: 50)
+                .frame(minHeight: 50)
                 .background(Theme.Palette.surface, in: Capsule())
                 .overlay(Capsule().strokeBorder(Theme.Palette.textPrimary, lineWidth: 1))
 
                 Button("Cancel") { dismiss() }
                     .font(.archivo(15, .semibold))
                     .foregroundStyle(Theme.Palette.textPrimary)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                    .buttonStyle(.suitePress)
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
@@ -135,16 +138,18 @@ struct SearchView: View {
             leading
             VStack(alignment: .leading, spacing: 3) {
                 Text(title).font(.archivo(15, .semibold)).foregroundStyle(Theme.Palette.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(subtitle)
                     .font(subtitleAccent ? .jetBrainsMono(11) : .archivo(12))
                     .textCase(subtitleAccent ? .uppercase : nil)
                     .foregroundStyle(subtitleAccent ? Theme.Palette.accent : Theme.Palette.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Spacer()
+            Spacer(minLength: 8)
             SuiteIconView(icon: .chevronRight, size: 16)
         }
         .padding(.horizontal, 16)
-        .frame(height: 62)
+        .frame(minHeight: 62)
         .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 16))
     }
 }

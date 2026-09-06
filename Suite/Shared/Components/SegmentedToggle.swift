@@ -15,6 +15,9 @@ struct SegmentedToggle<Option: Hashable>: View {
                 Text(option.title)
                     .font(.archivo(15, isActive ? .bold : .medium))
                     .foregroundStyle(isActive ? Theme.Palette.textPrimary : Theme.Palette.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .padding(.horizontal, 4)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background {
                         if isActive {
@@ -31,7 +34,7 @@ struct SegmentedToggle<Option: Hashable>: View {
             }
         }
         .padding(4)
-        .frame(height: height)
+        .frame(minHeight: height)
         .background(Theme.Palette.surfaceSunken, in: Capsule())
     }
 }

@@ -22,6 +22,10 @@ struct RootView: View {
                 OnboardingFlow()
             }
         }
+        // Fonts scale with the system text-size setting (Typography.swift).
+        // Clamp at accessibility3 (~235% of default — clears the 200% bar) while
+        // per-screen layouts are still being hardened; lift once they are.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility3)
         .task {
             if let settings = settings.first { auth.restoreSession(from: settings) }
         }

@@ -26,10 +26,14 @@ struct AddVisitView: View {
                 Text("Add your visits")
                     .font(.Suite.title).tracking(25 * -0.02)
                     .foregroundStyle(Theme.Palette.textPrimary)
-                Spacer()
+                    .lineLimit(2).minimumScaleFactor(0.7)
+                Spacer(minLength: 12)
                 Button("Done") { dismiss() }
                     .font(.archivo(15, .semibold))
                     .foregroundStyle(Theme.Palette.textPrimary)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                    .buttonStyle(.suitePress)
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
@@ -42,7 +46,7 @@ struct AddVisitView: View {
                     .autocorrectionDisabled()
             }
             .padding(.horizontal, 18)
-            .frame(height: 48)
+            .frame(minHeight: 48)
             .background(Theme.Palette.surface, in: Capsule())
             .overlay(Capsule().strokeBorder(Theme.Palette.border))
             .padding(.horizontal, 20)
@@ -72,7 +76,8 @@ struct AddVisitView: View {
                 Text(country.name)
                     .font(.archivo(15, isVisited ? .semibold : .medium))
                     .foregroundStyle(Theme.Palette.textPrimary)
-                Spacer()
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
                 if isVisited {
                     SuiteIconView(icon: .check, size: 14, color: Theme.Palette.onAccent)
                         .frame(width: 22, height: 22)
@@ -83,7 +88,7 @@ struct AddVisitView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .frame(height: 58)
+            .frame(minHeight: 58)
             .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 15))
             .overlay(
                 RoundedRectangle(cornerRadius: 15)

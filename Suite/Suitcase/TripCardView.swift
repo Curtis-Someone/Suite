@@ -23,13 +23,13 @@ struct TripCardView: View {
                     Text(trip.name)
                         .font(.archivo(17, .bold)).tracking(-0.17)
                         .foregroundStyle(isPast ? Theme.Palette.textBody : Theme.Palette.textPrimary)
-                        .lineLimit(1)
+                        .lineLimit(2)
                     Spacer(minLength: 6)
                     if isPast {
                         Text("Done")
                             .font(.jetBrainsMono(10, .medium)).tracking(0.8).textCase(.uppercase)
                             .foregroundStyle(Theme.Palette.textSecondary)
-                            .padding(.horizontal, 9).frame(height: 22)
+                            .padding(.horizontal, 9).frame(minHeight: 22)
                             .background(Theme.Palette.fillStrong, in: Capsule())
                     } else {
                         Text(countdown)
@@ -40,7 +40,8 @@ struct TripCardView: View {
                 Text("\(dateRange) · \(trip.destinationCountry)")
                     .font(.jetBrainsMono(12))
                     .foregroundStyle(Theme.Palette.textSecondary)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 SuiteProgressBar(value: isPast ? 1 : progress, height: 7)
 

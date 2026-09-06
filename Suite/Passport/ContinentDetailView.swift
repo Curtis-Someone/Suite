@@ -26,13 +26,14 @@ struct ContinentDetailView: View {
                             Text(country.name)
                                 .font(.archivo(15, visited ? .semibold : .regular))
                                 .foregroundStyle(visited ? Theme.Palette.textPrimary : Theme.Palette.textTertiary)
-                            Spacer()
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 8)
                             if visited {
                                 SuiteIconView(icon: .check, size: 13, color: Theme.Palette.accent)
                             }
                         }
                         .padding(.horizontal, 16)
-                        .frame(height: 52)
+                        .frame(minHeight: 52)
                         .background(visited ? Theme.Palette.accent.opacity(0.10) : Theme.Palette.surface,
                                    in: RoundedRectangle(cornerRadius: 14))
                         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.Palette.border))
@@ -45,6 +46,7 @@ struct ContinentDetailView: View {
         .background(Theme.Palette.ground.ignoresSafeArea())
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        .keepsSwipeBack()
     }
 
     private var header: some View {

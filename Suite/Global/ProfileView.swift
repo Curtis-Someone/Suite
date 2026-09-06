@@ -100,11 +100,12 @@ struct ProfileView: View {
     private func menuRow(_ title: String) -> some View {
         HStack {
             Text(title).font(.Suite.body).foregroundStyle(Theme.Palette.textHeading)
-            Spacer()
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
             SuiteIconView(icon: .chevronRight, size: 15)
         }
         .padding(.horizontal, 16)
-        .frame(height: 56)
+        .frame(minHeight: 56)
         .contentShape(Rectangle())
     }
 

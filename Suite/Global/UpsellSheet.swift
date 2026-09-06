@@ -5,7 +5,6 @@ import SwiftUI
 struct UpsellSheet: View {
     let moment: UpsellMoment
     @Environment(\.dismiss) private var dismiss
-    private let entitlements = Entitlements.shared
     @State private var showPlans = false
 
     var body: some View {
@@ -52,19 +51,11 @@ struct UpsellSheet: View {
         .presentationDetents([.height(420)])
         .presentationDragIndicator(.visible)
         .onChange(of: showPlans) { _, showing in
-            if !showing && entitlements.isPro { dismiss() }
+            // Closing the paywall (bought or not) also closes this upsell sheet.
+            if !showing { dismiss() }
         }
         .fullScreenCover(isPresented: $showPlans) {
-            PaywallView()
-                .overlay(alignment: .topLeading) {
-                    Button { showPlans = false; dismiss() } label: {
-                        SuiteIconView(icon: .close, size: 18, color: .white)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .accessibilityLabel("Close")
-                    .padding(.leading, 12).padding(.top, 8)
-                }
+            PaywallView()   // its own close button lives in its top-leading corner
         }
     }
 

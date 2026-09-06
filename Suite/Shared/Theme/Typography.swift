@@ -12,39 +12,45 @@ import SwiftUI
 /// Archivo (see the style-sheet artboard). Small inline data stays mono.
 extension Font {
 
-    static func archivo(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
-        .custom("Archivo", size: size).weight(weight)
+    /// Custom face that still scales with the system text-size setting.
+    /// `relativeTo` anchors the growth curve to a system text style — pass the
+    /// closest one for the role (`.largeTitle` for hero numbers, `.caption2` for
+    /// kickers). Defaults to `.body` so ad-hoc call sites scale too.
+    static func archivo(_ size: CGFloat, _ weight: Font.Weight = .regular,
+                        relativeTo style: Font.TextStyle = .body) -> Font {
+        .custom("Archivo", size: size, relativeTo: style).weight(weight)
     }
 
-    static func jetBrainsMono(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
-        .custom("JetBrains Mono", size: size).weight(weight)
+    static func jetBrainsMono(_ size: CGFloat, _ weight: Font.Weight = .regular,
+                              relativeTo style: Font.TextStyle = .body) -> Font {
+        .custom("JetBrains Mono", size: size, relativeTo: style).weight(weight)
     }
 
     enum Suite {
         /// Wordmark "Suite." — pair with `.tracking(size * -0.03)`.
-        static let display    = Font.archivo(40, .heavy)
+        static let display    = Font.archivo(40, .heavy, relativeTo: .largeTitle)
         /// Hero stat number (amber); the unit suffix drops to ~24pt / primary.
-        static let statXL     = Font.archivo(40, .bold)
-        static let statL      = Font.archivo(30, .bold)
-        static let statM      = Font.archivo(26, .bold)
+        static let statXL     = Font.archivo(40, .bold, relativeTo: .largeTitle)
+        static let statL      = Font.archivo(30, .bold, relativeTo: .title)
+        static let statM      = Font.archivo(26, .bold, relativeTo: .title)
 
-        static let titleXL    = Font.archivo(30, .bold)   // screen title, 2 lines
-        static let titleL     = Font.archivo(27, .bold)
-        static let title      = Font.archivo(25, .bold)
-        static let titleS     = Font.archivo(22, .bold)   // section header
+        static let titleXL    = Font.archivo(30, .bold, relativeTo: .largeTitle)  // screen title, 2 lines
+        static let titleL     = Font.archivo(27, .bold, relativeTo: .title)
+        static let title      = Font.archivo(25, .bold, relativeTo: .title)
+        static let titleS     = Font.archivo(22, .bold, relativeTo: .title2)      // section header
 
-        static let button     = Font.archivo(17, .bold)
-        static let bodyL      = Font.archivo(15, .regular) // 1.55 line height
-        static let body       = Font.archivo(15, .regular)
-        static let bodyStrong = Font.archivo(15, .semibold)
-        static let bodyS      = Font.archivo(13, .regular)
+        static let button     = Font.archivo(17, .bold, relativeTo: .headline)
+        static let bodyL      = Font.archivo(15, .regular, relativeTo: .body)     // 1.55 line height
+        static let body       = Font.archivo(15, .regular, relativeTo: .body)
+        static let bodyStrong = Font.archivo(15, .semibold, relativeTo: .body)
+        static let bodyS      = Font.archivo(13, .regular, relativeTo: .subheadline)
 
         /// Tabular data — fractions, percentages.
-        static let data       = Font.jetBrainsMono(12, .regular)
+        static let data       = Font.jetBrainsMono(12, .regular, relativeTo: .caption)
         /// Kicker label — pair with `.tracking(1.6)` + `.textCase(.uppercase)`.
-        static let label      = Font.jetBrainsMono(11, .medium)
-        static let labelS     = Font.jetBrainsMono(10, .regular)
-        static let micro      = Font.jetBrainsMono(9, .regular)
+        static let label      = Font.jetBrainsMono(11, .medium, relativeTo: .caption2)
+        static let labelS     = Font.jetBrainsMono(10, .regular, relativeTo: .caption2)
+        static let micro      = Font.jetBrainsMono(9, .regular, relativeTo: .caption2)
     }
 }
 

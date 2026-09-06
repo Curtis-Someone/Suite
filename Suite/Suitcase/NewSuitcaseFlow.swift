@@ -193,7 +193,7 @@ struct NewSuitcaseFlow: View {
     private func field<C: View>(@ViewBuilder _ content: () -> C) -> some View {
         content()
             .padding(.horizontal, 16)
-            .frame(height: 54)
+            .frame(minHeight: 54)
             .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Theme.Palette.border))
     }

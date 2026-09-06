@@ -63,6 +63,7 @@ struct PackingChecklistView: View {
         .background(Theme.Palette.ground.ignoresSafeArea())
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        .keepsSwipeBack()
         .task { await WeatherService.refresh(for: trip, in: context) }
         .alert("Add item", isPresented: Binding(get: { addingTo != nil }, set: { if !$0 { addingTo = nil } })) {
             TextField("Item name", text: $newItemName)
@@ -132,7 +133,7 @@ struct PackingChecklistView: View {
                         .font(.jetBrainsMono(11, .bold)).tracking(0.8).textCase(.uppercase)
                         .foregroundStyle(Theme.Palette.onAccent)
                 }
-                .padding(.horizontal, 11).frame(height: 26)
+                .padding(.horizontal, 11).frame(minHeight: 26)
                 .background(Theme.Palette.accent, in: Capsule())
                 .padding(.top, 14)
             }
@@ -140,12 +141,15 @@ struct PackingChecklistView: View {
             Text(trip.name)
                 .font(.Suite.title).tracking(26 * -0.02)
                 .foregroundStyle(Theme.Palette.textPrimary)
+                .lineLimit(2).minimumScaleFactor(0.6)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 14)
 
             HStack(spacing: 12) {
                 Text("\(Self.dateRange(trip)) · \(trip.destinationCountry)")
                     .font(.jetBrainsMono(12))
                     .foregroundStyle(Theme.Palette.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let weather = weatherSummary {
                     Rectangle().fill(Theme.Palette.track).frame(width: 1, height: 14)
                     HStack(spacing: 7) {
@@ -153,6 +157,7 @@ struct PackingChecklistView: View {
                         Text(weather.range)
                             .font(.jetBrainsMono(12, .medium))
                             .foregroundStyle(Theme.Palette.textPrimary)
+                            .fixedSize()
                     }
                 }
             }
@@ -161,14 +166,16 @@ struct PackingChecklistView: View {
             SuiteProgressBar(value: suitcase?.progress ?? 0.18, height: 9)
                 .padding(.top, 16)
 
-            HStack {
+            HStack(alignment: .firstTextBaseline) {
                 Text("\(percent)% ready · \(packedCount)/\(totalCount) packed")
                     .font(.archivo(13, .semibold))
                     .foregroundStyle(Theme.Palette.textPrimary)
-                Spacer()
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
                 Text(isDone ? "done" : "\(max(0, totalCount - packedCount)) to go")
                     .font(.jetBrainsMono(12))
                     .foregroundStyle(Theme.Palette.textTertiary)
+                    .fixedSize()
             }
             .padding(.top, 9)
         }
@@ -199,7 +206,7 @@ struct PackingChecklistView: View {
                         .font(.jetBrainsMono(12, .medium))
                         .foregroundStyle(packed == items.count ? Theme.Palette.textTertiary : Theme.Palette.accent)
                 }
-                .frame(height: 50)
+                .frame(minHeight: 50)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.suitePress)
@@ -219,7 +226,7 @@ struct PackingChecklistView: View {
                             Text("Add item").font(.archivo(13)).foregroundStyle(Theme.Palette.textTertiary)
                             Spacer()
                         }
-                        .frame(height: 44)
+                        .frame(minHeight: 44)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.suitePress)
@@ -268,9 +275,9 @@ struct PackingChecklistView: View {
                 .font(.archivo(14, item.isPacked ? .regular : .medium))
                 .foregroundStyle(item.isPacked ? Theme.Palette.textTertiary : Theme.Palette.textPrimary)
                 .strikethrough(item.isPacked, color: Theme.Palette.textTertiary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityHidden(true)
-
-            Spacer()
 
             if !isDone {
                 Button {
@@ -287,7 +294,7 @@ struct PackingChecklistView: View {
                 .accessibilityLabel("Delete \(label)")
             }
         }
-        .frame(height: 46)
+        .frame(minHeight: 46)
     }
 
     private var checkFill: Color { isDone ? Theme.Palette.textDisabled : Theme.Palette.accent }

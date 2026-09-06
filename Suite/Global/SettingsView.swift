@@ -48,7 +48,7 @@ struct SettingsView: View {
                     group("Preferences") {
                         HStack {
                             Text("Units").font(.Suite.body).foregroundStyle(Theme.Palette.textHeading)
-                            Spacer()
+                            Spacer(minLength: 8)
                             SegmentedToggle(
                                 options: [(UnitsPreference.metric, "Metric"), (UnitsPreference.imperial, "Imperial")],
                                 selection: Binding(
@@ -56,9 +56,10 @@ struct SettingsView: View {
                                     set: { settings.unitsPreference = $0; save() }),
                                 height: 34
                             )
-                            .frame(width: 190)
+                            .frame(minWidth: 190, idealWidth: 190, maxWidth: 230)
+                            .layoutPriority(1)
                         }
-                        .frame(height: 56)
+                        .frame(minHeight: 56)
                         divider
                         toggleRow("Packing reminders", isOn: Binding(
                             get: { settings.packingReminders },
@@ -86,7 +87,7 @@ struct SettingsView: View {
                                     .font(.Suite.bodyStrong)
                                     .foregroundStyle(Theme.Palette.danger)
                                     .frame(maxWidth: .infinity)
-                                    .frame(height: 44)
+                                    .frame(minHeight: 44)
                                     .contentShape(Rectangle())
                             }
                             .buttonStyle(.suitePress)
@@ -100,6 +101,7 @@ struct SettingsView: View {
         .background(Theme.Palette.ground.ignoresSafeArea())
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        .keepsSwipeBack()
         .sheet(isPresented: $askNotifications) {
             PermissionView(kind: .notifications) {}
         }
@@ -164,13 +166,14 @@ struct SettingsView: View {
     private func navRow(_ title: String, value: String? = nil, tint: Color = Theme.Palette.textHeading) -> some View {
         HStack {
             Text(title).font(.Suite.body).foregroundStyle(tint)
-            Spacer()
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
             if let value {
                 Text(value).font(.archivo(13)).foregroundStyle(Theme.Palette.textTertiary)
             }
             SuiteIconView(icon: .chevronRight, size: 15)
         }
-        .frame(height: 52)
+        .frame(minHeight: 52)
         .contentShape(Rectangle())
     }
 
@@ -180,7 +183,7 @@ struct SettingsView: View {
             Spacer()
             SuiteSwitch(isOn: isOn)
         }
-        .frame(height: 56)
+        .frame(minHeight: 56)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(title)
     }

@@ -95,16 +95,7 @@ struct ProBenefitsView: View {
             if !showing && entitlements.isPro { dismiss() }
         }
         .fullScreenCover(isPresented: $showPlans) {
-            PaywallView()
-                .overlay(alignment: .topLeading) {
-                    Button { showPlans = false } label: {
-                        SuiteIconView(icon: .close, size: 18, color: .white)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .accessibilityLabel("Close")
-                    .padding(.leading, 12).padding(.top, 8)
-                }
+            PaywallView()   // its own close button lives in its top-leading corner
         }
     }
 }

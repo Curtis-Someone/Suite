@@ -27,7 +27,7 @@ struct ErrorStateView: View {
                     Text("Try again")
                         .font(.archivo(16, .bold))
                         .foregroundStyle(Theme.Palette.onAccent)
-                        .frame(height: Theme.Size.ctaCompact)
+                        .frame(minHeight: Theme.Size.ctaCompact)
                         .padding(.horizontal, 34)
                         .background(Theme.Palette.accent, in: Capsule())
                 }

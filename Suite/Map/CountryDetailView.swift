@@ -123,10 +123,11 @@ struct CountryDetailView: View {
         HStack(spacing: 14) {
             SuiteIconView(icon: .mapPin, size: 16, color: Theme.Palette.textSecondary)
             Text(name).font(.archivo(15, .medium)).foregroundStyle(Theme.Palette.textPrimary)
-            Spacer()
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
         }
         .padding(.horizontal, 24)
-        .frame(height: 58)
+        .frame(minHeight: 58)
     }
 
     private func row<Icon: View>(
@@ -139,16 +140,18 @@ struct CountryDetailView: View {
             icon().frame(width: 22)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.archivo(15, .semibold)).foregroundStyle(Theme.Palette.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
                 if !subtitle.isEmpty {
                     Text(subtitle).font(.archivo(12)).foregroundStyle(Theme.Palette.textTertiary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            Spacer()
+            Spacer(minLength: 8)
             quickToggle(icon: .flag, on: visited, action: toggleVisited)
             quickToggle(icon: .heart, on: wanted, action: toggleWanted)
         }
         .padding(.horizontal, 24)
-        .frame(height: 62)
+        .frame(minHeight: 62)
     }
 
     private func quickToggle(icon: SuiteIcon, on: Bool, action: @escaping () -> Void) -> some View {
@@ -175,7 +178,7 @@ struct CountryDetailView: View {
                     .foregroundStyle(on ? Theme.Palette.onAccent : Theme.Palette.textPrimary)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 52)
+            .frame(minHeight: 52)
             .background(on ? Theme.Palette.accent : Theme.Palette.surfaceSunken, in: Capsule())
             .overlay(Capsule().strokeBorder(Theme.Palette.border, lineWidth: on ? 0 : 1))
         }

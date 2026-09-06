@@ -42,18 +42,31 @@ struct PaywallView: View {
                         startPoint: .top, endPoint: .bottom))
                 .ignoresSafeArea(edges: .top)
 
-            Button {
-                Task { working = true; await entitlements.restore(); working = false
-                    if entitlements.isPro { withAnimation { purchased = true } } }
-            } label: {
-                Text("Already purchased? Restore")
-                    .font(.archivo(13, .semibold))
-                    .underline()
-                    .foregroundStyle(.white)
+            HStack(alignment: .firstTextBaseline) {
+                Button { dismiss() } label: {
+                    SuiteIconView(icon: .close, size: 18, color: .white)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel("Close")
+
+                Spacer(minLength: 8)
+
+                Button {
+                    Task { working = true; await entitlements.restore(); working = false
+                        if entitlements.isPro { withAnimation { purchased = true } } }
+                } label: {
+                    Text("Already purchased? Restore")
+                        .font(.archivo(13, .semibold))
+                        .underline()
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.trailing)
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-            .padding(.trailing, 20)
-            .padding(.top, 12)
+            .padding(.horizontal, 12)
+            .padding(.top, 4)
 
             VStack(spacing: 0) {
                 Spacer().frame(height: 188)
@@ -61,11 +74,13 @@ struct PaywallView: View {
                 (Text("Unlock Suite ") + Text("Pro").foregroundColor(Theme.Palette.accent))
                     .font(.archivo(30, .heavy)).tracking(30 * -0.02)
                     .multilineTextAlignment(.center)
+                    .lineLimit(2).minimumScaleFactor(0.6)
                     .foregroundStyle(Theme.Palette.textHeading)
 
                 Text("Track everything. Pack smarter.\nNever hit a limit.")
                     .font(.archivo(14)).lineSpacing(3)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .foregroundStyle(Theme.Palette.textSecondary)
                     .padding(.top, 10)
 
@@ -105,11 +120,12 @@ struct PaywallView: View {
                 .disabled(working)
                 .padding(.top, 8)
 
-                (Text("5-day free trial, then billed yearly. Cancel anytime.\n")
+                (billingLine + Text("\n")
                  + Text("Terms of Use").underline() + Text(" apply."))
                     .font(.archivo(11)).lineSpacing(3)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Theme.Palette.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 14)
             }
             .padding(.horizontal, 24)
@@ -125,24 +141,55 @@ struct PaywallView: View {
         }
     }
 
+    // MARK: billing copy
+
+    private func displayPrice(_ id: ProductID) -> String {
+        entitlements.product(for: id)?.displayPrice ?? id.fallbackPrice
+    }
+
+    /// Trial / billing terms for the *selected* plan — the current single line
+    /// misstates terms for Monthly and Lifetime (HIG · In-App Purchase).
+    private var billingLine: Text {
+        switch plan {
+        case .proYearly:
+            Text("5-day free trial, then \(displayPrice(.proYearly)) / year. Cancel anytime.")
+        case .proMonthly:
+            Text("\(displayPrice(.proMonthly)) / month. Cancel anytime.")
+        case .proLifetime:
+            Text("One payment of \(displayPrice(.proLifetime)). No subscription.")
+        }
+    }
+
+    /// Yearly saving vs. paying monthly for a year — from StoreKit `Decimal`s
+    /// when loaded, else the CLAUDE.md-derived 47%.
+    private var savingsPercent: Int {
+        guard let yearly = entitlements.product(for: .proYearly)?.price,
+              let monthly = entitlements.product(for: .proMonthly)?.price,
+              monthly > 0 else { return 47 }
+        let saved = (monthly * 12 - yearly) / (monthly * 12)
+        return Int((saved as NSDecimalNumber).doubleValue * 100)
+    }
+
     // MARK: plan cards
 
     @ViewBuilder
     private func planCard(_ id: ProductID) -> some View {
         let selected = plan == id
-        let price = entitlements.product(for: id)?.displayPrice ?? id.fallbackPrice
+        let price = displayPrice(id)
 
         Button { plan = id } label: {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(title(id))
                         .font(.archivo(17, .bold))
+                        .lineLimit(1).minimumScaleFactor(0.7)
                         .foregroundStyle(muted(id) ? Theme.Palette.textSecondary : Theme.Palette.textHeading)
                     if id == .proYearly {
                         Text("5 days free")
                             .font(.jetBrainsMono(11, .bold))
                             .foregroundStyle(Theme.Palette.onAccent)
-                            .padding(.horizontal, 10).frame(height: 24)
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                            .padding(.horizontal, 10).frame(minHeight: 24)
                             .background(Theme.Palette.accent, in: Capsule())
                     } else if id == .proLifetime {
                         Text("one payment")
@@ -150,14 +197,16 @@ struct PaywallView: View {
                             .foregroundStyle(Theme.Palette.textTertiary)
                     }
                 }
-                Spacer()
+                Spacer(minLength: 10)
                 VStack(alignment: .trailing, spacing: 3) {
                     (Text(price) + Text(suffix(id)).font(.archivo(13)).foregroundColor(Theme.Palette.textSecondary))
                         .font(.archivo(22, .bold)).tracking(22 * -0.02)
+                        .lineLimit(1).minimumScaleFactor(0.5)
                         .foregroundStyle(muted(id) ? Theme.Palette.textSecondary : Theme.Palette.textHeading)
                     if id == .proYearly {
-                        Text(weekly(price))
+                        Text(weekly(id))
                             .font(.jetBrainsMono(11))
+                            .lineLimit(1).minimumScaleFactor(0.7)
                             .foregroundStyle(Theme.Palette.textTertiary)
                     }
                 }
@@ -170,10 +219,10 @@ struct PaywallView: View {
                                   lineWidth: selected ? 1.6 : 1))
             .overlay(alignment: .topTrailing) {
                 if id == .proYearly {
-                    Text("SAVE 47%")
+                    Text("SAVE \(savingsPercent)%")
                         .font(.jetBrainsMono(11, .bold))
                         .foregroundStyle(Theme.Palette.onAccent)
-                        .padding(.horizontal, 10).frame(height: 22)
+                        .padding(.horizontal, 10).frame(minHeight: 22)
                         .background(Theme.Palette.accent, in: Capsule())
                         .offset(x: -16, y: -11)
                 }
@@ -196,10 +245,15 @@ struct PaywallView: View {
         case .proLifetime: .clear
         }
     }
-    /// "≈ $0.48/wk" from a "$24.99" string.
-    private func weekly(_ price: String) -> String {
-        let digits = price.filter { $0.isNumber || $0 == "." }
+    /// "≈ $0.48/wk" — from the StoreKit `Decimal` + locale-correct format style
+    /// when the product is loaded, else parsed from the fallback string.
+    private func weekly(_ id: ProductID) -> String {
+        if let product = entitlements.product(for: id) {
+            let perWeek = product.price / Decimal(52)
+            return "≈ \(perWeek.formatted(product.priceFormatStyle)) / wk"
+        }
+        let digits = id.fallbackPrice.filter { $0.isNumber || $0 == "." }
         guard let value = Double(digits) else { return "" }
-        return String(format: "≈ $%.2f/wk", value / 52)
+        return String(format: "≈ $%.2f / wk", value / 52)
     }
 }
