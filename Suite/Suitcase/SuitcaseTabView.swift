@@ -4,6 +4,7 @@ import SwiftData
 /// Suitcase tab — empty state, or the Upcoming / Past trip list.
 struct SuitcaseTabView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.colorScheme) private var colorScheme
     private let entitlements = Entitlements.shared
     @Query(sort: \Trip.startDate) private var trips: [Trip]
     @State private var showingBuilder = false
@@ -190,11 +191,8 @@ struct SuitcaseTabView: View {
 
             Spacer()
 
-            Image("SuitcaseOpen")
-                .resizable().scaledToFit()
+            emptySuitcaseArt
                 .frame(width: 220, height: 220)
-                .blendMode(.multiply)
-                .opacity(0.85)
             Text("Empty suitcase")
                 .font(.archivo(17, .medium))
                 .foregroundStyle(Theme.Palette.textHeading)
@@ -215,6 +213,26 @@ struct SuitcaseTabView: View {
         // inset, so clear the floating nav pill by hand — 96 + the button's own
         // 24 matches the 120pt the populated list and the Passport scroll use.
         .padding(.bottom, 96)
+    }
+
+    /// The art is dark line-work on white. On the light surface `.multiply` drops
+    /// the white and keeps the linework; on the dark surface that same blend
+    /// collapses to near-black, so there we invert to light lines and `.screen`
+    /// the (now dark) ground away, landing on a soft light grey.
+    @ViewBuilder
+    private var emptySuitcaseArt: some View {
+        if colorScheme == .dark {
+            Image("SuitcaseOpen")
+                .resizable().scaledToFit()
+                .colorInvert()
+                .blendMode(.screen)
+                .opacity(0.55)
+        } else {
+            Image("SuitcaseOpen")
+                .resizable().scaledToFit()
+                .blendMode(.multiply)
+                .opacity(0.85)
+        }
     }
 
     /// Amber card, luminosity-blended suitcase photo, dark bottom-up gradient,
