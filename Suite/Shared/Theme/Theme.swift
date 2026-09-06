@@ -122,7 +122,7 @@ enum Theme {
 
     enum Icon {
         /// The single, consistent line-icon stroke weight (`sw` in the canvas).
-        static let stroke: CGFloat = 1.6
+        static let stroke: CGFloat = 1.75
         static let sizeS: CGFloat  = 16
         static let sizeM: CGFloat  = 18   // inline with text
         static let sizeL: CGFloat  = 24   // standard

@@ -84,12 +84,20 @@ struct SearchView: View {
                 .padding(.bottom, 10)
             }
 
-            ScrollView {
-                LazyVStack(spacing: 8) {
-                    ForEach(results) { row($0) }
+            if query.count >= 2 && results.isEmpty {
+                Spacer()
+                Text("Nothing matches “\(query)”.")
+                    .font(.Suite.bodyS)
+                    .foregroundStyle(Theme.Palette.textTertiary)
+                Spacer()
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 8) {
+                        ForEach(results) { row($0) }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
             }
         }
         .background(Theme.Palette.ground.ignoresSafeArea())

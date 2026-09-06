@@ -190,16 +190,21 @@ struct PassportTabView: View {
     private var myCountriesCard: some View {
         SuiteCard(padding: 20) {
             VStack(alignment: .leading, spacing: 13) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("My countries").font(.Suite.bodyStrong).foregroundStyle(Theme.Palette.textPrimary)
-                        Text("and non-UN territories").font(.archivo(11)).foregroundStyle(Theme.Palette.textTertiary)
+                Button { path.append(CountryList()) } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("My countries").font(.Suite.bodyStrong).foregroundStyle(Theme.Palette.textPrimary)
+                            Text("and non-UN territories").font(.archivo(11)).foregroundStyle(Theme.Palette.textTertiary)
+                        }
+                        Spacer()
+                        SuiteIconView(icon: .chevronRight, size: 16)
                     }
-                    Spacer()
-                    SuiteIconView(icon: .chevronRight, size: 16)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
                 }
-                .contentShape(Rectangle())
-                .onTapGesture { path.append(CountryList()) }
+                .buttonStyle(.suitePress)
+                .accessibilityLabel("My countries and territories")
+                .accessibilityAddTraits(.isButton)
 
                 ForEach(Array(stats.visitedCountries.prefix(3)), id: \.code) { country in
                     HStack(spacing: 12) {

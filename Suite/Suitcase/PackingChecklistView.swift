@@ -259,6 +259,8 @@ struct PackingChecklistView: View {
                         }
                     }
                     .frame(width: 22, height: 22)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel(item.name)
@@ -280,6 +282,8 @@ struct PackingChecklistView: View {
                     SuiteIconView(icon: .close, size: 12, color: Theme.Palette.textDisabled)
                         .frame(width: 26, height: 26)
                         .background(Theme.Palette.ground, in: RoundedRectangle(cornerRadius: 8))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Remove \(item.name)")

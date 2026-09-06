@@ -136,7 +136,7 @@ struct SuitcaseTabView: View {
 
     private func link(_ trip: Trip) -> some View {
         NavigationLink(value: trip) { TripCardView(trip: trip) }
-            .buttonStyle(.plain)
+            .buttonStyle(.suitePress)
     }
 
     private var addCard: some View {

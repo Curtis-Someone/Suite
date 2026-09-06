@@ -7,6 +7,7 @@ struct RewardOverlayView: View {
     let reward: Reward
     let onDismiss: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var shown = false
 
     var body: some View {
@@ -16,15 +17,19 @@ struct RewardOverlayView: View {
                 .onTapGesture { close() }
 
             card
-                .scaleEffect(shown ? 1 : 0.92)
+                .scaleEffect(reduceMotion ? 1 : (shown ? 1 : 0.92))
                 .opacity(shown ? 1 : 0)
                 .padding(.horizontal, 34)
+                .accessibilityAddTraits(.isModal)
+                .accessibilityAction { close() }
         }
         .onAppear {
-            withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { shown = true }
+            if reduceMotion { shown = true }
+            else { withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { shown = true } }
         }
         .task {
-            try? await Task.sleep(for: .seconds(3.4))
+            let seconds: Double = UIAccessibility.isVoiceOverRunning ? 12 : 6
+            try? await Task.sleep(for: .seconds(seconds))
             close()
         }
     }
