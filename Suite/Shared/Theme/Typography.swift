@@ -10,14 +10,18 @@ import SwiftUI
 /// Note on the "numbers are always monospaced" rule from `CLAUDE.md`: the
 /// handoff overrides it for the *big* hero stat numbers, which are set in
 /// Archivo (see the style-sheet artboard). Small inline data stays mono.
+///
+/// The ramp is a fixed pixel scale: `custom(_:fixedSize:)` opts every label
+/// out of Dynamic Type so the OS text-size setting can't inflate the layout.
+/// Real Dynamic Type support is tracked in `HIG_AUDIT.md` #1.
 extension Font {
 
     static func archivo(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
-        .custom("Archivo", size: size).weight(weight)
+        .custom("Archivo", fixedSize: size).weight(weight)
     }
 
     static func jetBrainsMono(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
-        .custom("JetBrains Mono", size: size).weight(weight)
+        .custom("JetBrains Mono", fixedSize: size).weight(weight)
     }
 
     enum Suite {
