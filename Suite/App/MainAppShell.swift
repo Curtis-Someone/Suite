@@ -3,6 +3,8 @@ import SwiftUI
 /// The post-onboarding shell: three tabs behind the custom bottom nav.
 /// Opens on Suitcase (the core loop).
 struct MainAppShell: View {
+    @Environment(\.modelContext) private var context
+
     @State private var tab: SuiteTab = {
         let a = ProcessInfo.processInfo.arguments
         if let i = a.firstIndex(of: "-tab"), i + 1 < a.count {
@@ -30,5 +32,6 @@ struct MainAppShell: View {
             BottomNavBar(selection: $tab)
         }
         .background(Theme.Palette.ground.ignoresSafeArea())
+        .task { TripVisitSync.run(context: context) }
     }
 }
