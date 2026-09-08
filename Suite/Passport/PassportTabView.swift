@@ -55,10 +55,11 @@ struct PassportTabView: View {
             }
             .navigationDestination(for: Continent.self) { ContinentDetailView(continent: $0) }
             .navigationDestination(for: CountryList.self) { _ in CountryListView() }
-            .navigationDestination(for: Trip.self) { PackingChecklistView(trip: $0) }
+            .navigationDestination(for: Trip.self) { TripDetailView(trip: $0) }
+            .navigationDestination(for: Suitcase.self) { PackingChecklistView(suitcase: $0) }
         }
         .sheet(isPresented: $showingAdd) { AddVisitView() }
-        .fullScreenCover(isPresented: $showingBuilder) { NewSuitcaseFlow { _ in } }
+        .fullScreenCover(isPresented: $showingBuilder) { NewTripFlow { _ in } }
         .task {
             guard !didSeed else { return }
             didSeed = true

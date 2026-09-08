@@ -89,8 +89,19 @@ struct PackingListDocument: View {
 
     // MARK: builders
 
+    /// One trip's primary bag — used by the Settings "Export your data" list.
     static func from(trip: Trip) -> PackingListDocument {
-        let items = trip.suitcases.first?.items ?? []
+        make(title: trip.name, trip: trip, items: trip.suitcases.first?.items ?? [])
+    }
+
+    /// A specific bag — used from its checklist.
+    static func from(suitcase: Suitcase) -> PackingListDocument {
+        let title = suitcase.trip.map { $0.name } ?? suitcase.name
+        let heading = (suitcase.trip?.suitcases.count ?? 0) > 1 ? "\(title) · \(suitcase.name)" : title
+        return make(title: heading, trip: suitcase.trip, items: suitcase.items)
+    }
+
+    private static func make(title: String, trip: Trip?, items: [Item]) -> PackingListDocument {
         let grouped = Dictionary(grouping: items, by: \.category)
         let sections = ItemCategory.allCases
             .sorted { $0.sortRank < $1.sortRank }
@@ -100,10 +111,14 @@ struct PackingListDocument: View {
                     .map { Row(name: $0.name, quantity: $0.quantity, packed: $0.isPacked) }
                 return Section(title: cat.displayName, rows: rows)
             }
-        let place = [trip.destinationCity, trip.destinationCountry].filter { !$0.isEmpty }.joined(separator: ", ")
+        let subtitle: String = {
+            guard let trip else { return "" }
+            let place = [trip.destinationCity, trip.destinationCountry].filter { !$0.isEmpty }.joined(separator: ", ")
+            return [PackingChecklistView.dateRange(trip), place].filter { !$0.isEmpty }.joined(separator: " · ")
+        }()
         return PackingListDocument(
-            title: trip.name,
-            subtitle: [PackingChecklistView.dateRange(trip), place].filter { !$0.isEmpty }.joined(separator: " · "),
+            title: title,
+            subtitle: subtitle,
             sections: sections,
             packedCount: items.filter(\.isPacked).count,
             totalCount: items.count)

@@ -1,10 +1,13 @@
 import SwiftUI
 import SwiftData
 
-/// S2a Basics → S2b Activities. Creates a Trip + its first Suitcase, seeded with
-/// items from the chosen chips. Calls `onCreated` with the new trip.
+/// S2a Basics → S2b Activities. Adds a `Suitcase` to an existing `Trip`, seeded
+/// with items from the chosen chips. The trip's own details (name, destination,
+/// dates, type) are set when the trip is created — this flow is bag-only.
+/// Calls `onCreated` with the new suitcase.
 struct NewSuitcaseFlow: View {
-    var onCreated: (Trip) -> Void
+    var trip: Trip
+    var onCreated: (Suitcase) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -14,23 +17,12 @@ struct NewSuitcaseFlow: View {
 
     // Basics
     @State private var name = ""
-    @State private var countryCode = ""
-    @State private var startDate = Date()
-    @State private var endDate = Calendar.current.date(byAdding: .day, value: 5, to: Date())!
-    @State private var tripTypeSel: Set<String> = []
     @State private var accommodation: Set<String> = []
     @State private var transport: Set<String> = []
-    @State private var showingCountryPicker = false
 
     // Activities
     @State private var activities: Set<String> = []
     @State private var other: Set<String> = []
-
-    private var basicsValid: Bool {
-        !name.trimmingCharacters(in: .whitespaces).isEmpty
-            && !countryCode.isEmpty
-            && endDate >= startDate
-    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -41,9 +33,6 @@ struct NewSuitcaseFlow: View {
             }
         }
         .background(Theme.Palette.ground.ignoresSafeArea())
-        .sheet(isPresented: $showingCountryPicker) {
-            CountryPicker(selectedCode: $countryCode)
-        }
     }
 
     // MARK: Header
@@ -81,27 +70,9 @@ struct NewSuitcaseFlow: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     field {
-                        TextField("List name", text: $name).font(.archivo(15, .medium))
+                        TextField("Bag name (e.g. Carry-on)", text: $name).font(.archivo(15, .medium))
                     }
 
-                    field {
-                        Button { showingCountryPicker = true } label: {
-                            HStack {
-                                Text(countryCode.isEmpty ? "Destination" : Countries.name(for: countryCode))
-                                    .font(.archivo(15, .medium))
-                                    .foregroundStyle(countryCode.isEmpty ? Theme.Palette.textTertiary : Theme.Palette.textPrimary)
-                                Spacer()
-                                SuiteIconView(icon: .chevronRight, size: 16)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    TripDatesCalendar(startDate: $startDate, endDate: $endDate)
-
-                    section("Type of trip") {
-                        BuilderChipGrid(chips: PackingPreset.tripTypes, singleSelect: true, selected: $tripTypeSel)
-                    }
                     section("Accommodation") {
                         BuilderChipGrid(chips: PackingPreset.accommodation, selected: $accommodation)
                     }
@@ -114,7 +85,7 @@ struct NewSuitcaseFlow: View {
             }
 
             footer {
-                SuiteButton(title: "Continue", isEnabled: basicsValid) {
+                SuiteButton(title: "Continue") {
                     withAnimation { step = .activities }
                 }
             }
@@ -156,33 +127,28 @@ struct NewSuitcaseFlow: View {
     // MARK: Create
 
     private func create() {
-        let country = Countries.name(for: countryCode)
-        let trip = Trip(
-            name: name.trimmingCharacters(in: .whitespaces),
-            destinationCity: "",
-            destinationCountry: country,
-            destinationCountryCode: countryCode,
-            startDate: Calendar.current.startOfDay(for: startDate),
-            endDate: Calendar.current.startOfDay(for: endDate)
-        )
-        let suitcase = Suitcase(name: "Packing list", trip: trip)
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let suitcase = Suitcase(name: trimmed.isEmpty ? "Packing list" : trimmed, trip: trip)
 
         let selected = accommodation.union(transport).union(activities).union(other)
-        trip.tripType = tripTypeSel.first ?? ""
-        trip.iconName = trip.tripType.isEmpty
-            ? PackingPreset.tripIcon(for: selected)
-            : (PackingPreset.icon(forTripType: trip.tripType) ?? "luggage")
         suitcase.items = PackingPreset.items(for: selected).enumerated().map { index, preset in
             let item = Item(name: preset.name, category: preset.category, quantity: preset.quantity)
             item.sortOrder = index
             return item
         }
-        trip.suitcases = [suitcase]
 
-        context.insert(trip)
+        // If the trip never got a distinctive icon, let the first bag's chips
+        // pick one — never overwrite a type-derived icon.
+        if trip.iconName.isEmpty || trip.iconName == "luggage" {
+            let derived = PackingPreset.tripIcon(for: selected)
+            if derived != "luggage" { trip.iconName = derived }
+        }
+
+        trip.suitcases.append(suitcase)
+        context.insert(suitcase)
         try? context.save()
         dismiss()
-        onCreated(trip)
+        onCreated(suitcase)
     }
 
     // MARK: Building blocks
