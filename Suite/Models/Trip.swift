@@ -47,10 +47,17 @@ final class Trip {
     }
 
     /// Derived, not stored — status comes from today's date vs. the trip dates.
+    ///
+    /// Compared at day granularity: a trip is `.active` for the whole of its
+    /// first *and* last calendar day (and all day for a single-day trip), not
+    /// only up to the midnight instant of `endDate`.
     var status: TripStatus {
-        let now = Date.now
-        if now < startDate { return .upcoming }
-        if now > endDate { return .past }
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let start = cal.startOfDay(for: startDate)
+        let end = cal.startOfDay(for: endDate)
+        if today < start { return .upcoming }
+        if today > end { return .past }
         return .active
     }
 }
