@@ -4,11 +4,16 @@ import SwiftUI
 struct TripCardView: View {
     let trip: Trip
 
-    private var suitcase: Suitcase? { trip.suitcases.first }
     private var isPast: Bool { trip.isArchived || trip.status == .past }
-    private var progress: Double { suitcase?.progress ?? 0.18 }
-    private var packed: Int { suitcase?.items.filter(\.isPacked).count ?? 0 }
-    private var total: Int { suitcase?.items.count ?? 0 }
+    /// A trip can hold several bags now — show the trip's overall readiness.
+    private var bags: [Suitcase] { trip.suitcases }
+    private var items: [Item] { bags.flatMap(\.items) }
+    private var progress: Double {
+        guard !bags.isEmpty else { return 0 }
+        return bags.map(\.progress).reduce(0, +) / Double(bags.count)
+    }
+    private var packed: Int { items.filter(\.isPacked).count }
+    private var total: Int { items.count }
 
     var body: some View {
         HStack(spacing: 14) {
@@ -44,7 +49,7 @@ struct TripCardView: View {
 
                 SuiteProgressBar(value: isPast ? 1 : progress, height: 7)
 
-                Text(isPast ? "\(packed)/\(total) packed" : "\(Int((progress * 100).rounded()))% ready · \(packed)/\(total)")
+                Text(statusLine)
                     .font(.jetBrainsMono(11))
                     .foregroundStyle(isPast ? Theme.Palette.textTertiary : Theme.Palette.textBody)
             }
@@ -52,6 +57,13 @@ struct TripCardView: View {
         .padding(16)
         .background(isPast ? Theme.Palette.panel : Theme.Palette.surfaceSunken,
                    in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    private var statusLine: String {
+        guard !bags.isEmpty else { return isPast ? "No packing list" : "No suitcase yet" }
+        let tail = bags.count > 1 ? " · \(bags.count) bags" : ""
+        if isPast { return "\(packed)/\(total) packed\(tail)" }
+        return "\(Int((progress * 100).rounded()))% ready · \(packed)/\(total)\(tail)"
     }
 
     private var dateRange: String {
