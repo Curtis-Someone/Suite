@@ -11,6 +11,7 @@ struct SettingsView: View {
     @Query private var settingsList: [UserSettings]
     @State private var askNotifications = false
     @State private var confirmSignOut = false
+    @State private var confirmDeleteAccount = false
     @State private var showPro = false
     @State private var showDataExport = false
     @State private var upsell: UpsellMoment?
@@ -42,7 +43,10 @@ struct SettingsView: View {
                     group("Account") {
                         navRow("Apple ID", value: auth.isSignedIn ? (settings.displayName.isEmpty ? "Signed in" : settings.displayName) : "Not signed in")
                         divider
-                        navRow("Delete account", tint: Theme.Palette.danger)
+                        Button { confirmDeleteAccount = true } label: {
+                            navRow("Delete account", tint: Theme.Palette.danger)
+                        }
+                        .buttonStyle(.plain)
                     }
 
                     group("Preferences") {
@@ -108,6 +112,27 @@ struct SettingsView: View {
         .confirmationDialog("Log out of Suite?", isPresented: $confirmSignOut, titleVisibility: .visible) {
             Button("Log out", role: .destructive) { auth.signOut(context: context) }
         }
+        .alert("Delete Account", isPresented: $confirmDeleteAccount) {
+            Button("Delete Account", role: .destructive) { deleteAccount() }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This permanently removes all your trips, suitcases, packing lists and visited places from this device, and signs you out. This can't be undone.")
+        }
+    }
+
+    /// H-01 · Guideline 5.1.1(v) — in-app account deletion. Wipes every local
+    /// record, clears the stored Apple identity, and drops back to onboarding.
+    private func deleteAccount() {
+        let models: [any PersistentModel.Type] = [
+            Trip.self, Suitcase.self, Item.self,
+            Template.self, TemplateItem.self,
+            Traveler.self, WeatherDay.self,
+            VisitedPlace.self, WishlistPlace.self, UserSettings.self,
+        ]
+        for model in models { try? context.delete(model: model) }
+        try? context.save()
+        // TODO: once iCloud sync ships, also delete the user's CloudKit records.
+        auth.signOut(context: context)   // recreates a virgin UserSettings row
     }
 
     private func exportTapped() {

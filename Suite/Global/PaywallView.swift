@@ -105,11 +105,11 @@ struct PaywallView: View {
                 .disabled(working)
                 .padding(.top, 8)
 
-                (Text("5-day free trial, then billed yearly. Cancel anytime.\n")
-                 + Text("Terms of Use").underline() + Text(" apply."))
+                Text("5-day free trial, then billed yearly. Cancel anytime.\n[Terms of Use](\(SuiteLinks.termsOfUse)) and [Privacy Policy](\(SuiteLinks.privacyPolicy)) apply.")
                     .font(.archivo(11)).lineSpacing(3)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Theme.Palette.textTertiary)
+                    .tint(Theme.Palette.textSecondary)
                     .padding(.top, 14)
             }
             .padding(.horizontal, 24)
