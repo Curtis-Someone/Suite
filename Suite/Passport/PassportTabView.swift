@@ -208,7 +208,7 @@ struct PassportTabView: View {
 
                 ForEach(Array(stats.visitedCountries.prefix(3)), id: \.code) { country in
                     HStack(spacing: 12) {
-                        Text(country.flag).font(.system(size: 20)).frame(width: 30, height: 21)
+                        FlagView(code: country.code, height: 21)
                         Text(country.name).font(.archivo(14, .medium)).foregroundStyle(Theme.Palette.textHeading)
                     }
                 }

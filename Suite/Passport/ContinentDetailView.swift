@@ -21,7 +21,7 @@ struct ContinentDetailView: View {
                     ForEach(countries) { country in
                         let visited = visitedCodes.contains(country.code)
                         HStack(spacing: 13) {
-                            Text(country.flag).font(.system(size: 22)).frame(width: 28, height: 20)
+                            FlagView(code: country.code, height: 20)
                                 .opacity(visited ? 1 : 0.35)
                             Text(country.name)
                                 .font(.archivo(15, visited ? .semibold : .regular))

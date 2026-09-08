@@ -36,7 +36,7 @@ struct CountryListView: View {
                 LazyVStack(spacing: 7) {
                     ForEach(rows, id: \.country.code) { row in
                         HStack(spacing: 13) {
-                            Text(row.country.flag).font(.system(size: 22)).frame(width: 28, height: 20)
+                            FlagView(code: row.country.code, height: 20)
                             Text(row.country.name)
                                 .font(.archivo(15, .medium))
                                 .foregroundStyle(Theme.Palette.textPrimary)

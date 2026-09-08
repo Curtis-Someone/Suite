@@ -63,10 +63,7 @@ struct CountryDetailView: View {
 
     private var header: some View {
         HStack(spacing: 14) {
-            Text(country?.flag ?? "")
-                .font(.system(size: 30))
-                .frame(width: 52, height: 40)
-                .background(Theme.Palette.surfaceSunken, in: RoundedRectangle(cornerRadius: 10))
+            FlagView(code: iso, height: 40)
             Text(country?.name ?? iso)
                 .font(.Suite.titleL).tracking(27 * -0.02)
                 .foregroundStyle(Theme.Palette.textPrimary)

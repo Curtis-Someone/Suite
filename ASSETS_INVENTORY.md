@@ -26,6 +26,19 @@ Location: `Assets.xcassets/Lucide/<name>.imageset/<name>.svg`. One consistent st
 
 arrow-left, baby, backpack, ban, bath, bed-single, bell, bike, book-open, book-open-check, briefcase-business, building-2, bus, calendar, camera, car, check, check-check, chevron-down, chevron-left, chevron-right, chevron-up, circle-check, circle-check-big, circle-plus, circle-user, cloud, cloud-rain, cloud-snow, cloud-sun-rain, compass, contact, droplets, dumbbell, ellipsis, flag, footprints, funnel, gem, glasses, globe, globe-lock, heart, heart-handshake, house, info, landmark, list, list-filter, list-plus, luggage, map, map-pin, mountain, music, party-popper, pencil, pencil-line, pin, plane, plug, plus, sailboat, search, settings, share-2, ship, shirt, snowflake, sparkles, square-pen, sun, sun-medium, tent, thermometer, train-front, trash-2, tree-palm, trees, umbrella, users, utensils, wifi, wifi-off, wind, x
 
+## Country flags (261 SVGs)
+
+Location: `Assets.xcassets/Flags/` (namespaced — reference as `Image("Flags/<ISO>")`),
+one vector imageset per ISO 3166-1 alpha-2 code the app lists. Flat,
+rounded-rectangle style; corners + hairline edge are applied at render time by
+`FlagView`.
+
+Artwork: **flagpack** (`flagpack-core` v2.1.0, MIT © Yummygum), 32×24 `l`-size
+SVGs, used directly for 247 codes. 8 codes reuse the flag that legitimately flies
+there (`GB`→`GB-UKM`, `BQ`→`BQ-BO`, `EA`→`ES`, `CP`→`FR`, `DG`→`IO`, `AC`/`TA`→`SH`,
+`CQ`→`GG`). 6 are hand-drawn in the same style (`EU`, `EZ` reuse the EU drawing,
+`UN`, `XK`, `IC`, `QO` — `QO` is a neutral globe placeholder, no real flag).
+
 ## Fonts
 
 `Suite/Resources/Fonts/`

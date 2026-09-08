@@ -65,9 +65,7 @@ struct HomeCountryView: View {
             selected = country
         } label: {
             HStack(spacing: 13) {
-                Text(country.flag)
-                    .font(.system(size: 26))
-                    .frame(width: 30, height: 22)
+                FlagView(code: country.code, height: 22)
                 Text(country.name)
                     .font(.archivo(15, isSelected ? .bold : .medium))
                     .foregroundStyle(Theme.Palette.textPrimary)
