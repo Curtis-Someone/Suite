@@ -45,10 +45,9 @@ enum SampleData {
             t.isArchived = archived
             return t
         }
-        func fill(_ t: Trip, type: String, chips: Set<String>, packedFraction: Double) {
-            t.tripType = type
-            t.iconName = PackingPreset.icon(forTripType: type) ?? PackingPreset.tripIcon(for: chips)
-            let s = Suitcase(name: "Packing list", trip: t)
+        @discardableResult
+        func addBag(_ t: Trip, name: String, chips: Set<String>, packedFraction: Double) -> Suitcase {
+            let s = Suitcase(name: name, trip: t)
             s.items = PackingPreset.items(for: chips).enumerated().map { i, p in
                 let item = Item(name: p.name, category: p.category, quantity: p.quantity)
                 item.sortOrder = i
@@ -56,19 +55,32 @@ enum SampleData {
             }
             let packUpto = Int(Double(s.items.count) * packedFraction)
             for item in s.items.prefix(packUpto) { item.isPacked = true }
-            t.suitcases = [s]
+            t.suitcases.append(s)
+            return s
+        }
+        func fill(_ t: Trip, type: String, chips: Set<String>, packedFraction: Double) {
+            t.tripType = type
+            t.iconName = PackingPreset.icon(forTripType: type) ?? PackingPreset.tripIcon(for: chips)
+            addBag(t, name: "Packing list", chips: chips, packedFraction: packedFraction)
         }
 
         let lisbon = trip("Lisbon & Sintra", "Lisbon", "Portugal", "PT", startsInDays: 12, lengthDays: 8)
         fill(lisbon, type: "beach", chips: ["essentials", "clothes", "toiletries", "beach"], packedFraction: 0.6)
 
+        // Two bags — exercises the trip/suitcase split.
         let dolomites = trip("Dolomites hike", "Cortina", "Italy", "IT", startsInDays: 48, lengthDays: 7)
-        fill(dolomites, type: "mountains", chips: ["essentials", "clothes", "hiking", "photography"], packedFraction: 0.12)
+        fill(dolomites, type: "mountains", chips: ["essentials", "clothes", "hiking"], packedFraction: 0.12)
+        addBag(dolomites, name: "Camera bag", chips: ["photography"], packedFraction: 0.4)
+
+        // No suitcase yet — a freshly planned trip.
+        let porto = trip("Porto weekend", "Porto", "Portugal", "PT", startsInDays: 20, lengthDays: 3)
+        porto.tripType = "city"
+        porto.iconName = PackingPreset.icon(forTripType: "city") ?? "luggage"
 
         let kyoto = trip("Kyoto in autumn", "Kyoto", "Japan", "JP", startsInDays: -300, lengthDays: 6, archived: true)
         fill(kyoto, type: "city", chips: ["essentials", "clothes", "toiletries", "international"], packedFraction: 1)
 
-        [lisbon, dolomites, kyoto].forEach(context.insert)
+        [lisbon, dolomites, porto, kyoto].forEach(context.insert)
         try? context.save()
     }
 

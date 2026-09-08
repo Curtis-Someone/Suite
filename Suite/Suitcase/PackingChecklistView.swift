@@ -2,9 +2,10 @@ import SwiftUI
 import SwiftData
 
 /// S3 packing checklist and S4 completed state (same layout; `trip.isArchived`
-/// makes it read-only + muted).
+/// makes it read-only + muted). Keyed on a single `Suitcase` — a trip can hold
+/// several; the trip-level actions (complete / reopen) live on `TripDetailView`.
 struct PackingChecklistView: View {
-    let trip: Trip
+    let suitcase: Suitcase
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -17,11 +18,13 @@ struct PackingChecklistView: View {
     @State private var templateSaved = false
     @State private var showExport = false
 
-    private var suitcase: Suitcase? { trip.suitcases.first }
-    private var isDone: Bool { trip.isArchived }
+    /// Safe to force-unwrap: `body` renders the error state when the inverse is
+    /// missing, and every suitcase we push here belongs to a trip.
+    private var trip: Trip { suitcase.trip! }
+    private var isDone: Bool { suitcase.trip?.isArchived ?? false }
 
     private var sections: [(category: ItemCategory, items: [Item])] {
-        let grouped = Dictionary(grouping: suitcase?.items ?? [], by: \.category)
+        let grouped = Dictionary(grouping: suitcase.items, by: \.category)
         return ItemCategory.allCases
             .sorted { $0.sortRank < $1.sortRank }
             .compactMap { cat in
@@ -31,10 +34,10 @@ struct PackingChecklistView: View {
     }
 
     var body: some View {
-        if suitcase == nil {
+        if suitcase.trip == nil {
             ErrorStateView(
                 title: "Suitcase not found",
-                message: "We couldn't load the checklist for this trip. Go back and open it again.",
+                message: "We couldn't load this packing list. Go back and open it again.",
                 retry: { dismiss() }
             )
         } else {
@@ -76,7 +79,7 @@ struct PackingChecklistView: View {
             if let addingTo { Text(addingTo.displayName) }
         }
         .sheet(item: $upsell) { UpsellSheet(moment: $0) }
-        .sheet(isPresented: $showExport) { TripExportSheet(trip: trip) }
+        .sheet(isPresented: $showExport) { TripExportSheet(suitcase: suitcase) }
         .alert("Saved to templates", isPresented: $templateSaved) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -99,7 +102,6 @@ struct PackingChecklistView: View {
     }
 
     private func saveTemplate() {
-        guard let suitcase else { return }
         let template = Template(name: trip.name, sourceTripName: trip.name)
         template.items = suitcase.items.map {
             TemplateItem(name: $0.name, category: $0.category, quantity: $0.quantity, template: template)
@@ -122,18 +124,13 @@ struct PackingChecklistView: View {
                 .accessibilityLabel("Back")
                 Spacer()
                 Menu {
-                    if !isDone {
-                        Button("Mark trip complete") { markComplete() }
-                    } else {
-                        Button("Reopen trip") { trip.isArchived = false; try? context.save() }
-                    }
                     Button("Save as template") { saveTemplateTapped() }
                     Button("Export as PDF") { exportTapped() }
                 } label: {
                     SuiteIconView(icon: .ellipsis, size: 20, color: Theme.Palette.textPrimary)
                         .frame(width: 40, height: 40)
                 }
-                .accessibilityLabel("Trip options")
+                .accessibilityLabel("Packing list options")
             }
 
             if isDone {
@@ -169,7 +166,7 @@ struct PackingChecklistView: View {
             }
             .padding(.top, 8)
 
-            SuiteProgressBar(value: suitcase?.progress ?? 0.18, height: 9)
+            SuiteProgressBar(value: suitcase.progress, height: 9)
                 .padding(.top, 16)
 
             HStack {
@@ -245,7 +242,7 @@ struct PackingChecklistView: View {
                 let wasAllPacked = allPacked
                 item.isPacked.toggle()
                 try? context.save()
-                if !wasAllPacked, allPacked, let suitcase {
+                if !wasAllPacked, allPacked {
                     RewardEngine.suitcasePacked(trip: trip, itemCount: suitcase.items.count)
                 }
             } label: {
@@ -299,34 +296,21 @@ struct PackingChecklistView: View {
     private func addItem() {
         let trimmed = newItemName.trimmingCharacters(in: .whitespaces)
         newItemName = ""
-        guard let category = addingTo, !trimmed.isEmpty, let suitcase else { return }
+        guard let category = addingTo, !trimmed.isEmpty else { return }
         let item = Item(name: trimmed, category: category, suitcase: suitcase)
         item.sortOrder = (suitcase.items.map(\.sortOrder).max() ?? 0) + 1
         suitcase.items.append(item)
         try? context.save()
     }
 
-    private func markComplete() {
-        trip.isArchived = true
-        context.insert(VisitedPlace(
-            countryName: trip.destinationCountry,
-            countryCode: trip.destinationCountryCode,
-            cityName: trip.destinationCity,
-            sourceTripID: trip.tripID
-        ))
-        try? context.save()
-        let visits = (try? context.fetch(FetchDescriptor<VisitedPlace>())) ?? []
-        RewardEngine.tripComplete(trip: trip, visits: visits)
-    }
-
     private var allPacked: Bool {
-        guard let suitcase, !suitcase.items.isEmpty else { return false }
+        guard !suitcase.items.isEmpty else { return false }
         return suitcase.items.allSatisfy(\.isPacked)
     }
 
-    private var totalCount: Int { suitcase?.items.count ?? 0 }
-    private var packedCount: Int { suitcase?.items.filter(\.isPacked).count ?? 0 }
-    private var percent: Int { Int(((suitcase?.progress ?? 0.18) * 100).rounded()) }
+    private var totalCount: Int { suitcase.items.count }
+    private var packedCount: Int { suitcase.items.filter(\.isPacked).count }
+    private var percent: Int { Int((suitcase.progress * 100).rounded()) }
 
     private var weatherSummary: (range: String, icon: String)? {
         let days = trip.weatherDays

@@ -10,14 +10,14 @@ struct SuitcaseTabView: View {
     @State private var showingProfile = false
     @State private var showingSearch = false
     @State private var upsell: UpsellMoment?
-    @State private var path: [Trip] = []
+    @State private var path = NavigationPath()
     @State private var didApplyDevArgs = false
 
     private var upcoming: [Trip] { trips.filter { !$0.isArchived && $0.status != .past } }
     private var past: [Trip] { trips.visibleArchive(isPro: entitlements.isPro) }
 
-    /// Free tier caps active trips — creating a suitcase creates a trip here.
-    private func newSuitcaseTapped() {
+    /// Free tier caps active trips. Suitcases are added later, from the trip.
+    private func newTripTapped() {
         switch PackingGate.canCreateTrip(existingTrips: trips, isPro: entitlements.isPro) {
         case .allowed:            showingBuilder = true
         case .blocked(let reason): upsell = reason
@@ -34,21 +34,22 @@ struct SuitcaseTabView: View {
                 // Once the list has a few trips the dashed add-card scrolls away,
                 // so the FAB takes over.
                 if !trips.isEmpty && upcoming.count > 2 {
-                    Button { newSuitcaseTapped() } label: {
+                    Button { newTripTapped() } label: {
                         SuiteIconView(icon: .plus, size: 24, color: Theme.Palette.onAccent)
                             .frame(width: 56, height: 56)
                             .background(Theme.Palette.accent, in: Circle())
                             .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
                     }
-                    .accessibilityLabel("New suitcase")
+                    .accessibilityLabel("New trip")
                     .padding(.trailing, 24)
                     .padding(.bottom, 20)
                 }
             }
-            .navigationDestination(for: Trip.self) { PackingChecklistView(trip: $0) }
+            .navigationDestination(for: Trip.self) { TripDetailView(trip: $0) }
+            .navigationDestination(for: Suitcase.self) { PackingChecklistView(suitcase: $0) }
         }
         .fullScreenCover(isPresented: $showingBuilder) {
-            NewSuitcaseFlow { newTrip in path = [newTrip] }
+            NewTripFlow { newTrip in path.append(newTrip) }
         }
         .sheet(isPresented: $showingSearch) { SearchView() }
         .sheet(isPresented: $showingProfile) { ProfileView() }
@@ -56,7 +57,8 @@ struct SuitcaseTabView: View {
         .task { applyDevArgs() }
     }
 
-    /// Dev: `-seedTrips`, `-openChecklist <upcoming|past>`, `-openBuilder`.
+    /// Dev: `-seedTrips`, `-openTrip <upcoming|past>` (trip detail),
+    /// `-openChecklist <upcoming|past>` (its first bag's checklist), `-openBuilder`.
     private func applyDevArgs() {
         guard !didApplyDevArgs else { return }
         didApplyDevArgs = true
@@ -68,12 +70,23 @@ struct SuitcaseTabView: View {
             SampleData.seedOneTrip(into: context)
         }
         if args.contains("-openProfile") { showingProfile = true }
+
+        func target(_ key: String) -> Trip? {
+            guard let i = args.firstIndex(of: key), i + 1 < args.count else { return nil }
+            switch args[i + 1] {
+            case "past":  return past.first
+            case "empty": return upcoming.first { $0.suitcases.isEmpty }
+            default:      return upcoming.first
+            }
+        }
         if args.contains("-openBuilder") {
             showingBuilder = true
-        } else if let i = args.firstIndex(of: "-openChecklist"), i + 1 < args.count {
+        } else if let trip = target("-openTrip") {
+            DispatchQueue.main.async { path.append(trip) }
+        } else if let trip = target("-openChecklist") {
             DispatchQueue.main.async {
-                let target = args[i + 1] == "past" ? past.first : upcoming.first
-                if let target { path = [target] }
+                path.append(trip)
+                if let bag = trip.suitcases.first { path.append(bag) }
             }
         }
     }
@@ -140,10 +153,10 @@ struct SuitcaseTabView: View {
     }
 
     private var addCard: some View {
-        Button { newSuitcaseTapped() } label: {
+        Button { newTripTapped() } label: {
             HStack(spacing: 10) {
                 SuiteIconView(icon: .plus, size: 18, color: Theme.Palette.textSecondary)
-                Text("New suitcase")
+                Text("New trip")
                     .font(.archivo(15, .semibold))
                     .foregroundStyle(Theme.Palette.textSecondary)
             }
@@ -195,11 +208,11 @@ struct SuitcaseTabView: View {
                 .frame(width: 220, height: 220)
                 .blendMode(.multiply)
                 .opacity(0.85)
-            Text("Empty suitcase")
+            Text("No trips yet")
                 .font(.archivo(17, .medium))
                 .foregroundStyle(Theme.Palette.textHeading)
                 .padding(.top, 4)
-            Text("Start one and Suite will keep the\nchecklist for your next trip.")
+            Text("Plan a trip and Suite keeps its bags\nand checklists together.")
                 .font(.Suite.bodyS)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Theme.Palette.textTertiary)
@@ -207,7 +220,7 @@ struct SuitcaseTabView: View {
 
             Spacer()
 
-            SuiteButton(title: "New suitcase", showsLeadingPlus: true) { newSuitcaseTapped() }
+            SuiteButton(title: "New trip", showsLeadingPlus: true) { newTripTapped() }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
         }

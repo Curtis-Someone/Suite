@@ -4,7 +4,20 @@ import PDFKit
 /// Pro export — turns a trip's packing list into a PDF and hands it to the
 /// system share sheet (Messages, Mail, Files, Print…).
 struct TripExportSheet: View {
-    let trip: Trip
+    private let document: PackingListDocument
+    private let shareTitle: String
+
+    init(suitcase: Suitcase) {
+        document = .from(suitcase: suitcase)
+        let tripName = suitcase.trip?.name ?? "Trip"
+        shareTitle = (suitcase.trip?.suitcases.count ?? 0) > 1 ? "\(tripName) — \(suitcase.name)" : "\(tripName) — packing list"
+    }
+
+    init(trip: Trip) {
+        document = .from(trip: trip)
+        shareTitle = "\(trip.name) — packing list"
+    }
+
     @Environment(\.dismiss) private var dismiss
     @State private var pdfURL: URL?
     @State private var preview: Image?
@@ -51,7 +64,7 @@ struct TripExportSheet: View {
 
             if let pdfURL {
                 ShareLink(item: pdfURL,
-                          preview: SharePreview("\(trip.name) — packing list",
+                          preview: SharePreview(shareTitle,
                                                 image: Image(systemName: "doc.text"))) {
                     Text("Share PDF")
                         .font(.Suite.button)
@@ -70,8 +83,7 @@ struct TripExportSheet: View {
 
     @MainActor
     private func build() async {
-        let doc = PackingListDocument.from(trip: trip)
-        guard let url = makePackingListPDF(doc, name: "\(trip.name) packing list") else {
+        guard let url = makePackingListPDF(document, name: shareTitle) else {
             failed = true; return
         }
         pdfURL = url

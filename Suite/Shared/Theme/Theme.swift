@@ -27,6 +27,9 @@ enum Theme {
         static let fill          = Color(light: 0xEFEBE3, dark: 0x1F1F20)
         /// Slightly stronger fill (pressed chips, nav hairline zone).
         static let fillStrong    = Color(light: 0xEAE6DF, dark: 0x232325)
+        /// P2 trip-detail stat tile — a near-black block on the light ground
+        /// (handoff); a raised dark surface where a black block would vanish.
+        static let statTile      = Color(light: 0x0A0A0A, dark: 0x1C1C1E)
 
         /// Hairline border.
         static let border        = Color(light: 0xE4E0D9, dark: 0x232323)
