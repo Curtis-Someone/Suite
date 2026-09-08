@@ -109,11 +109,12 @@ struct AuthFormView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 4)
 
-            Text("By continuing you agree to our Terms of use.\nOur Privacy policy applies.")
+            Text("By continuing you agree to our [Terms of Use](\(SuiteLinks.termsOfUse)).\nOur [Privacy Policy](\(SuiteLinks.privacyPolicy)) applies.")
                 .font(.archivo(11))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .foregroundStyle(Theme.Palette.textTertiary)
+                .tint(Theme.Palette.textSecondary)
                 .frame(maxWidth: .infinity)
         }
         .padding(28)
