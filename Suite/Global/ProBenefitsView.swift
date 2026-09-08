@@ -10,16 +10,16 @@ struct ProBenefitsView: View {
 
     private struct Benefit { let icon, title, body: String }
     private let benefits = [
-        Benefit(icon: "map-pin", title: "Track cities & regions",
-                body: "See exactly where you've been, not just which countries."),
         Benefit(icon: "luggage", title: "Unlimited trips & suitcases",
-                body: "Keep as many trips going as you like, with your full archive."),
+                body: "Keep as many active trips and packing lists going as you like."),
+        Benefit(icon: "calendar", title: "Your full archive",
+                body: "Every trip you've taken stays in your history — Free keeps only the last three."),
         Benefit(icon: "book-open", title: "Templates",
                 body: "Turn a packed trip into a reusable list you start from next time."),
-        Benefit(icon: "sparkles", title: "Smart packing",
-                body: "Suggestions from the trip type and the forecast, plus advanced weather."),
-        Benefit(icon: "globe", title: "iCloud sync & travellers",
-                body: "Your trips on every device, and shared with the people you travel with."),
+        Benefit(icon: "share-2", title: "PDF & Messages export",
+                body: "Send any packing list as a PDF, or share it straight into Messages."),
+        Benefit(icon: "landmark", title: "Passport stats",
+                body: "Your places-been stats — every country and city you've visited, kept like stamps."),
     ]
 
     var body: some View {

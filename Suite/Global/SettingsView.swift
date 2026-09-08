@@ -164,7 +164,7 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Upgrade to Suite Pro")
                                 .font(.Suite.bodyStrong).foregroundStyle(Theme.Palette.textHeading)
-                            Text("Unlimited trips, templates, sync and more")
+                            Text("Unlimited trips, templates, export and more")
                                 .font(.archivo(12)).foregroundStyle(Theme.Palette.textSecondary)
                         }
                         Spacer()
