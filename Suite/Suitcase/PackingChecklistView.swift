@@ -182,24 +182,6 @@ struct PackingChecklistView: View {
                     .foregroundStyle(Theme.Palette.textTertiary)
             }
             .padding(.top, 9)
-
-            if !isDone && totalCount > 0 {
-                HStack {
-                    Spacer()
-                    Button { selectAll() } label: {
-                        Text("Select all")
-                            .font(.archivo(13, .semibold))
-                            .foregroundStyle(allPacked ? Theme.Palette.textTertiary : Theme.Palette.accent)
-                            .padding(.horizontal, 14)
-                            .frame(height: 32)
-                            .overlay(Capsule().strokeBorder(allPacked ? Theme.Palette.border : Theme.Palette.accent.opacity(0.5)))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(allPacked)
-                    .accessibilityLabel("Select all items")
-                }
-                .padding(.top, 12)
-            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
@@ -214,23 +196,39 @@ struct PackingChecklistView: View {
         let isCollapsed = collapsed.contains(category)
         let packed = items.filter(\.isPacked).count
         return VStack(spacing: 0) {
-            Button {
-                if isCollapsed { collapsed.remove(category) } else { collapsed.insert(category) }
-            } label: {
-                HStack(spacing: 10) {
-                    SuiteIconView(icon: isCollapsed ? .chevronRight : .chevronDown,
-                                  size: 14, color: Theme.Palette.textPrimary)
-                    Text(category.displayName)
-                        .font(.archivo(14, .bold))
-                        .foregroundStyle(isDone ? Theme.Palette.textSecondary : Theme.Palette.textPrimary)
-                    Spacer()
-                    Text("\(packed)/\(items.count)")
-                        .font(.jetBrainsMono(12, .medium))
-                        .foregroundStyle(packed == items.count ? Theme.Palette.textTertiary : Theme.Palette.accent)
+            HStack(spacing: 10) {
+                Button {
+                    if isCollapsed { collapsed.remove(category) } else { collapsed.insert(category) }
+                } label: {
+                    HStack(spacing: 10) {
+                        SuiteIconView(icon: isCollapsed ? .chevronRight : .chevronDown,
+                                      size: 14, color: Theme.Palette.textPrimary)
+                        Text(category.displayName)
+                            .font(.archivo(14, .bold))
+                            .foregroundStyle(isDone ? Theme.Palette.textSecondary : Theme.Palette.textPrimary)
+                        Spacer(minLength: 8)
+                        Text("\(packed)/\(items.count)")
+                            .font(.jetBrainsMono(12, .medium))
+                            .foregroundStyle(packed == items.count ? Theme.Palette.textTertiary : Theme.Palette.accent)
+                    }
+                    .contentShape(Rectangle())
                 }
-                .frame(height: 50)
+                .buttonStyle(.plain)
+
+                if !isDone && packed < items.count {
+                    Button { selectAll(items) } label: {
+                        Text("Select all")
+                            .font(.archivo(12, .semibold))
+                            .foregroundStyle(Theme.Palette.accent)
+                            .padding(.horizontal, 10)
+                            .frame(height: 28)
+                            .overlay(Capsule().strokeBorder(Theme.Palette.accent.opacity(0.5)))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Select all \(category.displayName) items")
+                }
             }
-            .buttonStyle(.plain)
+            .frame(height: 50)
 
             if !isCollapsed {
                 ForEach(items) { item in
@@ -293,18 +291,33 @@ struct PackingChecklistView: View {
             Spacer()
 
             if !isDone {
-                Button {
-                    context.delete(item)
-                    try? context.save()
-                } label: {
-                    SuiteIconView(icon: .close, size: 12, color: Theme.Palette.textDisabled)
-                        .frame(width: 26, height: 26)
-                        .background(Theme.Palette.ground, in: RoundedRectangle(cornerRadius: 8))
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
+                HStack(spacing: 0) {
+                    Button {
+                        item.quantity += 1
+                        try? context.save()
+                    } label: {
+                        SuiteIconView(icon: .plus, size: 12, color: Theme.Palette.textDisabled)
+                            .frame(width: 26, height: 26)
+                            .background(Theme.Palette.ground, in: RoundedRectangle(cornerRadius: 8))
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Add one \(item.name)")
+
+                    Button {
+                        context.delete(item)
+                        try? context.save()
+                    } label: {
+                        SuiteIconView(icon: .close, size: 12, color: Theme.Palette.textDisabled)
+                            .frame(width: 26, height: 26)
+                            .background(Theme.Palette.ground, in: RoundedRectangle(cornerRadius: 8))
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Remove \(item.name)")
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Remove \(item.name)")
             }
         }
         .frame(height: 46)
@@ -324,12 +337,13 @@ struct PackingChecklistView: View {
         try? context.save()
     }
 
-    private func selectAll() {
-        guard let suitcase, !isDone else { return }
+    /// Marks every item in one packing section packed.
+    private func selectAll(_ items: [Item]) {
+        guard !isDone else { return }
         let wasAllPacked = allPacked
-        for item in suitcase.items { item.isPacked = true }
+        for item in items { item.isPacked = true }
         try? context.save()
-        if !wasAllPacked {
+        if !wasAllPacked, allPacked, let suitcase {
             RewardEngine.suitcasePacked(trip: trip, itemCount: suitcase.items.count)
         }
     }
