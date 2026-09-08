@@ -75,7 +75,7 @@ struct MapTabView: View {
                     .accessibilityLabel("Add a place you've visited")
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 20)
+                .padding(.bottom, Theme.Size.navPillClearance)
             }
         }
         .sheet(item: $selection) { CountryDetailView(iso: $0.iso) }

@@ -26,7 +26,10 @@ struct MainAppShell: View {
         .tabViewStyle(.page(indexDisplayMode: .never))
         .ignoresSafeArea(edges: .top)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+        // The pill is a pure overlay — it reserves no layout space, so the tab
+        // content runs full-bleed to the screen edge and scrolls *behind* it
+        // (each tab already pads its own content clear of the pill).
+        .overlay(alignment: .bottom) {
             BottomNavBar(selection: $tab)
         }
         .background(Theme.Palette.ground.ignoresSafeArea())
