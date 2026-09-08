@@ -102,9 +102,10 @@ struct WorldMapView: View {
             }
             .contentShape(Rectangle())
             .gesture(interactive ? pinchGesture : nil)
-            // One-finger pan only once the user has zoomed in — otherwise a
-            // horizontal drag belongs to the tab-swipe, not the map.
-            .gesture((interactive && zoom * pinch > 3.4) ? panGesture : nil)
+            // The map owns finger drags at any zoom so you can pan freely;
+            // switch tabs with the bottom pill. highPriority so the drag wins
+            // over the paged TabView's swipe.
+            .highPriorityGesture(interactive ? panGesture : nil)
             .onTapGesture { loc in
                 guard interactive, focus == nil, let onTapCountry else { return }
                 let unit = loc.applying(t.inverted())
@@ -133,7 +134,7 @@ struct WorldMapView: View {
     }
 
     private var panGesture: some Gesture {
-        DragGesture(minimumDistance: 8)
+        DragGesture(minimumDistance: 3)
             .updating($drag) { value, state, _ in state = value.translation }
             .onEnded { pan.width += $0.translation.width; pan.height += $0.translation.height }
     }
