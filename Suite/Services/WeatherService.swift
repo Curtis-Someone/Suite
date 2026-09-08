@@ -89,12 +89,17 @@ enum WeatherService {
             let daily: Daily
         }
         let daily = (try JSONDecoder().decode(Response.self, from: data)).daily
-        return daily.time.indices.map { i in
+        // Open-Meteo returns these arrays in lockstep, but guard against a
+        // short/ragged response rather than force-indexing into a crash.
+        let count = min(daily.time.count, daily.temperature_2m_max.count,
+                        daily.temperature_2m_min.count, daily.weathercode.count)
+        let precips = daily.precipitation_probability_max
+        return (0..<count).map { i in
             DayForecast(
                 date: df.date(from: daily.time[i]) ?? from,
                 high: daily.temperature_2m_max[i],
                 low: daily.temperature_2m_min[i],
-                precip: (daily.precipitation_probability_max[i] ?? 0) / 100,
+                precip: ((i < precips.count ? precips[i] : nil) ?? 0) / 100,
                 code: daily.weathercode[i]
             )
         }
