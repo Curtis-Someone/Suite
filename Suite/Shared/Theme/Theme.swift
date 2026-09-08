@@ -111,7 +111,7 @@ enum Theme {
         /// Compact CTA (inside sheets / forms).
         static let ctaCompact: CGFloat = 54
         static let field: CGFloat      = 52
-        /// Floating glass nav pill — bar height (was a full-width 78pt strip).
+        /// Bottom nav — height of the tab row (excludes the home-indicator inset).
         static let navPill: CGFloat    = 56
         static let tabIcon: CGFloat    = 28
         /// Progress-bar thickness.

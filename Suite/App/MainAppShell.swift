@@ -17,7 +17,7 @@ struct MainAppShell: View {
 
     var body: some View {
         // A paged TabView so a horizontal finger-swipe moves between tabs;
-        // the custom pill stays the visible control, bound to the same selection.
+        // the custom bottom bar stays the visible control, bound to the same selection.
         TabView(selection: $tab) {
             MapTabView().tag(SuiteTab.map)
             SuitcaseTabView().tag(SuiteTab.suitcase)

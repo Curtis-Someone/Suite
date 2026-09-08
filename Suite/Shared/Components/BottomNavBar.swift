@@ -25,12 +25,14 @@ enum SuiteTab: CaseIterable {
     }
 }
 
-/// Bottom navigation — a floating "glass pill" over the tab content.
+/// Bottom navigation — a solid, edge-to-edge bar anchored to the screen
+/// bottom. Opaque `surface` fill (white in light mode), a hairline top
+/// border for separation from the scrolling content, and the fill bleeds
+/// through the home-indicator inset so the bottom reads white too.
 ///
-/// `.ultraThinMaterial` picks up Liquid Glass on iOS 26 and degrades to a
-/// plain blur on earlier releases. The active tab is shown *structurally* —
-/// icon + label inside a neutral capsule highlight — so it doesn't rely on
-/// colour perception (same rule as visited/not-visited on the Passport).
+/// The active tab is shown *structurally* — icon + label inside a neutral
+/// capsule highlight — so it doesn't rely on colour perception (same rule
+/// as visited/not-visited on the Passport).
 struct BottomNavBar: View {
     @Binding var selection: SuiteTab
 
@@ -57,15 +59,15 @@ struct BottomNavBar: View {
                 }
             }
         }
-        .padding(.horizontal, 6)
+        .padding(.horizontal, Theme.Space.s)
+        .frame(maxWidth: .infinity)
         .frame(height: Theme.Size.navPill)
-        .background(.ultraThinMaterial, in: .capsule)
-        .overlay(
-            Capsule().strokeBorder(Color.white.opacity(0.5), lineWidth: 0.5)
-        )
-        .shadow(color: Color.black.opacity(0.12), radius: 16, x: 0, y: 6)
-        .padding(.horizontal, Theme.Space.xl)
-        .padding(.bottom, Theme.Space.m)
+        .background(Theme.Palette.surface.ignoresSafeArea(edges: .bottom))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Theme.Palette.border)
+                .frame(height: 0.5)
+        }
     }
 }
 
