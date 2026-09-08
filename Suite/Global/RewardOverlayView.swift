@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// R1–R4 · the reward overlay — dark scrim, a centred white card with an amber
-/// ray-burst behind an 88pt badge, headline + one line of copy. Taps or a ~3.4s
-/// timer dismiss it.
+/// ray-burst behind an 88pt badge, headline + one line of copy. A tap dismisses
+/// it; so does a 3s timer, unless Reduce Motion is on (then it's tap-only).
 struct RewardOverlayView: View {
     let reward: Reward
     let onDismiss: () -> Void
@@ -28,8 +28,9 @@ struct RewardOverlayView: View {
             else { withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { shown = true } }
         }
         .task {
-            let seconds: Double = UIAccessibility.isVoiceOverRunning ? 12 : 6
-            try? await Task.sleep(for: .seconds(seconds))
+            // Reduce Motion → no auto-dismiss; the user taps to close.
+            guard !reduceMotion else { return }
+            try? await Task.sleep(for: .seconds(3))
             close()
         }
     }

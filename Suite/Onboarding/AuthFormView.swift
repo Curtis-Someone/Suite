@@ -47,7 +47,7 @@ struct AuthFormView: View {
 
     private var hero: some View {
         ZStack {
-            Color(hex: 0x0A0A0A)   // the hero is always dark (night-map treatment), both modes
+            Color(hex: 0x14161A)   // the hero is always dark (night-map treatment), both modes
             LinearGradient(
                 colors: [.black.opacity(0.6), .black.opacity(0.12), .black.opacity(0.8)],
                 startPoint: .top, endPoint: .bottom
