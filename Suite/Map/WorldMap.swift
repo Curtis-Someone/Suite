@@ -7,6 +7,8 @@ struct WorldCountry: Identifiable {
     let iso: String
     let name: String
     let path: Path
+    /// Unit-space bounding box of the whole outline, for off-screen culling.
+    let bounds: CGRect
     /// Unit-space centre + rough size of the largest landmass, for framing.
     let center: CGPoint
     let unitSize: CGFloat
@@ -75,6 +77,7 @@ enum WorldMap {
             let center = CGPoint(x: (xs.min()! + xs.max()!) / 2, y: (ys.min()! + ys.max()!) / 2)
             let size = max(xs.max()! - xs.min()!, ys.max()! - ys.min()!)
             return WorldCountry(iso: c.iso, name: c.name, path: path,
+                                bounds: path.boundingRect,
                                 center: center, unitSize: max(0.01, size))
         }
     }

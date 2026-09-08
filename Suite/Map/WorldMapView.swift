@@ -31,13 +31,21 @@ struct WorldMapView: View {
     var body: some View {
         GeometryReader { geo in
             let t = transform(in: geo.size)
-            Canvas { ctx, size in
+            Canvas(opaque: true) { ctx, size in
                 ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(ground))
                 let screenScale = t.a           // net unit → px scale
+                // Strokes are authored in screen pt; undo the CTM scale so they
+                // stay hairline-thin at every zoom level.
+                let hair = 1 / screenScale
+                let viewRect = CGRect(origin: .zero, size: size).insetBy(dx: -2, dy: -2)
                 var labels: [(String, CGPoint, Bool)] = []
 
+                // Draw in unit space: set the transform on the context once
+                // rather than rebuilding every country's Path each frame.
+                ctx.transform = t
+
                 for c in WorldMap.countries where c.iso != "AQ" {
-                    let p = c.path.applying(t)
+                    guard c.bounds.applying(t).intersects(viewRect) else { continue }
                     let isVisited = visited.contains(c.iso)
                     let isWished = !isVisited && wishlist.contains(c.iso)
                     let fill: Color
@@ -50,13 +58,13 @@ struct WorldMapView: View {
                     } else {
                         fill = land
                     }
-                    ctx.fill(p, with: .color(fill))
+                    ctx.fill(c.path, with: .color(fill))
                     if isWished {
-                        ctx.stroke(p, with: .color(wishBorder), lineWidth: 0.9)
+                        ctx.stroke(c.path, with: .color(wishBorder), lineWidth: 0.9 * hair)
                     } else if c.iso == highlight {
-                        ctx.stroke(p, with: .color(.white.opacity(0.9)), lineWidth: 1.4)
+                        ctx.stroke(c.path, with: .color(.white.opacity(0.9)), lineWidth: 1.4 * hair)
                     } else {
-                        ctx.stroke(p, with: .color(border), lineWidth: 0.5)
+                        ctx.stroke(c.path, with: .color(border), lineWidth: 0.5 * hair)
                     }
 
                     // Label at the main-landmass centroid, once it's big enough
@@ -68,6 +76,8 @@ struct WorldMapView: View {
                         }
                     }
                 }
+
+                ctx.transform = .identity   // labels are positioned in screen space
                 for (name, at, onAmber) in labels {
                     ctx.draw(
                         Text(name)
@@ -97,7 +107,15 @@ struct WorldMapView: View {
     private var pinchGesture: some Gesture {
         MagnificationGesture()
             .updating($pinch) { value, state, _ in state = value }
-            .onEnded { zoom = min(24, max(1.6, zoom * $0)) }
+            .onEnded { value in
+                let newZoom = min(24, max(1.6, zoom * value))
+                // Bake the same factor into the pan so the point under the
+                // screen centre stays put when the live gesture ends.
+                let applied = newZoom / zoom
+                pan.width *= applied
+                pan.height *= applied
+                zoom = newZoom
+            }
     }
 
     private var panGesture: some Gesture {
@@ -122,7 +140,11 @@ struct WorldMapView: View {
 
         let z = zoom * pinch
         let s = base * z                                     // unit → px
-        let livePan = CGSize(width: pan.width + drag.width, height: pan.height + drag.height)
+        // While a pinch is live, scale the accumulated pan by the same factor
+        // so the map zooms about the screen centre instead of sliding under
+        // the fingers. (pinch == 1 when no pinch is in progress.)
+        let livePan = CGSize(width: pan.width * pinch + drag.width,
+                             height: pan.height * pinch + drag.height)
         // Centre this unit point on the screen centre. y = 0.44 keeps the
         // populated band (≈60°N–50°S) filling the view without wasting height
         // on the empty Arctic / Antarctic.
