@@ -63,7 +63,7 @@ struct PaywallView: View {
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Theme.Palette.textHeading)
 
-                Text("Track everything. Pack smarter.\nNever hit a limit.")
+                Text("Every trip. Every list.\nNo limits.")
                     .font(.archivo(14)).lineSpacing(3)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Theme.Palette.textSecondary)

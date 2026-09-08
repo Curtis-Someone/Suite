@@ -18,17 +18,10 @@ enum Continent: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Countries in this continent (design denominators).
-    var totalCountries: Int {
-        switch self {
-        case .africa:       54
-        case .asia:         50
-        case .europe:       51
-        case .northAmerica: 23
-        case .southAmerica: 12
-        case .oceania:      14
-        }
-    }
+    /// Countries in this continent — the count of curated UN sovereign states
+    /// that resolve here (see `Countries.continentCounts`). Used as the Passport
+    /// denominator, so a visited count can never exceed it.
+    var totalCountries: Int { Countries.continentCounts[self] ?? 0 }
 
     /// Display order on the Passport tab.
     var sortRank: Int {
