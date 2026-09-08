@@ -1,8 +1,11 @@
 import SwiftUI
 
-/// Flat vector world map, styled to the app's dark map surface. Pinch to zoom,
-/// drag to pan. Visited countries fill solid amber. Vector, so it stays crisp
-/// at any zoom.
+/// Flat vector world map. Pinch to zoom, drag to pan. Visited countries fill
+/// solid amber. Vector, so it stays crisp at any zoom. Follows the app theme:
+/// a night-map surface in dark, the handoff's pale paper map in light. Pass
+/// `scheme: .dark` to pin it dark regardless of the system setting — the
+/// Share-card and paywall heroes do this, as they sit under a heavy dark
+/// gradient with white text in both appearances.
 struct WorldMapView: View {
     var visited: Set<String>
     /// Countries on the want-to-go list — drawn as a hollow amber tint.
@@ -12,32 +15,51 @@ struct WorldMapView: View {
     /// When set, frames on this country and only fills it.
     var focus: String? = nil
     var interactive: Bool = true
+    /// Pin the map palette to one appearance, ignoring the system setting.
+    var scheme: ColorScheme? = nil
     var onTapCountry: ((String) -> Void)? = nil
 
+    @Environment(\.colorScheme) private var systemScheme
     @State private var zoom: CGFloat = 2.9
     @State private var pan: CGSize = .zero
     @GestureState private var pinch: CGFloat = 1
     @GestureState private var drag: CGSize = .zero
 
-    // Dark map palette — this surface is always dark (like the login hero).
-    private let ground = Color(hex: 0x0E1012)
-    private let land   = Color(hex: 0x2B2E33)
-    private let landDim = Color(hex: 0x212327)
-    private let border = Color(hex: 0x3B3E44)
+    private var isDark: Bool { (scheme ?? systemScheme) == .dark }
+
+    // Map palette. Dark = the app's hand-tuned night-map surface. Light = the
+    // Claude Design handoff's Map-tab palette (MAPCFG): pale taupe land on a
+    // white ocean, hairline white country borders.
+    private var ground:  Color { isDark ? Color(hex: 0x0E1012) : Color(hex: 0xFFFFFF) }
+    private var land:    Color { isDark ? Color(hex: 0x2B2E33) : Color(hex: 0xDEDAD2) }
+    private var landDim: Color { isDark ? Color(hex: 0x212327) : Color(hex: 0xEBE8E1) }
+    private var border:  Color { isDark ? Color(hex: 0x3B3E44) : Color(hex: 0xFFFFFF) }
     // Want-to-go: a solid muted gold, clearly dimmer than the visited amber.
-    private let wishFill   = Color(hex: 0x7C6636)
-    private let wishBorder = Color(hex: 0xA98A4E)
+    private var wishFill:   Color { isDark ? Color(hex: 0x7C6636) : Color(hex: 0xE7CE9E) }
+    private var wishBorder: Color { isDark ? Color(hex: 0xA98A4E) : Color(hex: 0xC9A057) }
+    // Outline on the country whose sheet is open.
+    private var highlightStroke: Color { isDark ? Color.white.opacity(0.9) : Color(hex: 0x1A1A1A).opacity(0.65) }
+    // Centroid label on a non-visited country (visited ones use dark-on-amber).
+    private var labelInk: Color { isDark ? Color(hex: 0x8A857E) : Color(hex: 0x77736C) }
 
     var body: some View {
         GeometryReader { geo in
             let t = transform(in: geo.size)
-            Canvas { ctx, size in
+            Canvas(opaque: true) { ctx, size in
                 ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(ground))
                 let screenScale = t.a           // net unit → px scale
+                // Strokes are authored in screen pt; undo the CTM scale so they
+                // stay hairline-thin at every zoom level.
+                let hair = 1 / screenScale
+                let viewRect = CGRect(origin: .zero, size: size).insetBy(dx: -2, dy: -2)
                 var labels: [(String, CGPoint, Bool)] = []
 
+                // Draw in unit space: set the transform on the context once
+                // rather than rebuilding every country's Path each frame.
+                ctx.transform = t
+
                 for c in WorldMap.countries where c.iso != "AQ" {
-                    let p = c.path.applying(t)
+                    guard c.bounds.applying(t).intersects(viewRect) else { continue }
                     let isVisited = visited.contains(c.iso)
                     let isWished = !isVisited && wishlist.contains(c.iso)
                     let fill: Color
@@ -50,13 +72,13 @@ struct WorldMapView: View {
                     } else {
                         fill = land
                     }
-                    ctx.fill(p, with: .color(fill))
+                    ctx.fill(c.path, with: .color(fill))
                     if isWished {
-                        ctx.stroke(p, with: .color(wishBorder), lineWidth: 0.9)
+                        ctx.stroke(c.path, with: .color(wishBorder), lineWidth: 0.9 * hair)
                     } else if c.iso == highlight {
-                        ctx.stroke(p, with: .color(.white.opacity(0.9)), lineWidth: 1.4)
+                        ctx.stroke(c.path, with: .color(highlightStroke), lineWidth: 1.4 * hair)
                     } else {
-                        ctx.stroke(p, with: .color(border), lineWidth: 0.5)
+                        ctx.stroke(c.path, with: .color(border), lineWidth: 0.5 * hair)
                     }
 
                     // Label at the main-landmass centroid, once it's big enough
@@ -68,19 +90,18 @@ struct WorldMapView: View {
                         }
                     }
                 }
+
+                ctx.transform = .identity   // labels are positioned in screen space
                 for (name, at, onAmber) in labels {
                     ctx.draw(
                         Text(name)
                             .font(.system(size: 10.5, weight: .medium))
-                            .foregroundStyle(onAmber ? Color(hex: 0x1A130A) : Color(hex: 0x8A857E)),
+                            .foregroundStyle(onAmber ? Color(hex: 0x1A130A) : labelInk),
                         at: at)
                 }
             }
             .contentShape(Rectangle())
-            .gesture(interactive ? pinchGesture : nil)
-            // One-finger pan only once the user has zoomed in — otherwise a
-            // horizontal drag belongs to the tab-swipe, not the map.
-            .gesture((interactive && zoom * pinch > 3.4) ? panGesture : nil)
+            .gesture(interactive ? mapGesture : nil)
             .onTapGesture { loc in
                 guard interactive, focus == nil, let onTapCountry else { return }
                 let unit = loc.applying(t.inverted())
@@ -94,16 +115,25 @@ struct WorldMapView: View {
 
     // MARK: Gestures
 
-    private var pinchGesture: some Gesture {
-        MagnificationGesture()
-            .updating($pinch) { value, state, _ in state = value }
-            .onEnded { zoom = min(24, max(1.6, zoom * $0)) }
-    }
-
-    private var panGesture: some Gesture {
-        DragGesture(minimumDistance: 8)
-            .updating($drag) { value, state, _ in state = value.translation }
-            .onEnded { pan.width += $0.translation.width; pan.height += $0.translation.height }
+    /// Pinch to zoom and one-finger drag to pan, recognised together so a
+    /// two-finger gesture can do both at once.
+    private var mapGesture: some Gesture {
+        SimultaneousGesture(
+            MagnificationGesture()
+                .updating($pinch) { value, state, _ in state = value }
+                .onEnded { value in
+                    let newZoom = min(24, max(1.6, zoom * value))
+                    // Bake the same factor into the pan so the point under the
+                    // screen centre stays put when the live gesture ends.
+                    let applied = newZoom / zoom
+                    pan.width *= applied
+                    pan.height *= applied
+                    zoom = newZoom
+                },
+            DragGesture()
+                .updating($drag) { value, state, _ in state = value.translation }
+                .onEnded { pan.width += $0.translation.width; pan.height += $0.translation.height }
+        )
     }
 
     // MARK: Projection → view
@@ -122,7 +152,11 @@ struct WorldMapView: View {
 
         let z = zoom * pinch
         let s = base * z                                     // unit → px
-        let livePan = CGSize(width: pan.width + drag.width, height: pan.height + drag.height)
+        // While a pinch is live, scale the accumulated pan by the same factor
+        // so the map zooms about the screen centre instead of sliding under
+        // the fingers. (pinch == 1 when no pinch is in progress.)
+        let livePan = CGSize(width: pan.width * pinch + drag.width,
+                             height: pan.height * pinch + drag.height)
         // Centre this unit point on the screen centre. y = 0.44 keeps the
         // populated band (≈60°N–50°S) filling the view without wasting height
         // on the empty Arctic / Antarctic.
