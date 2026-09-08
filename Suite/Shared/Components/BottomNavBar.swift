@@ -25,12 +25,13 @@ enum SuiteTab: CaseIterable {
     }
 }
 
-/// Bottom navigation — a solid, edge-to-edge bar anchored to the screen
-/// bottom. Opaque `surface` fill (white in light mode), a hairline top
-/// border for separation from the scrolling content, and the fill bleeds
-/// through the home-indicator inset so the bottom reads white too.
+/// Bottom navigation — a floating "bubble": a solid `surface` capsule inset
+/// from the screen edges, lifted off the content with a soft shadow. Solid,
+/// not the old `.ultraThinMaterial` glass.
 ///
-/// The active tab is shown *structurally* — icon + label inside a neutral
+/// Tapping a tab is *reactive* — the pressed tab springs down under the
+/// finger (`TabPressStyle`) and the switch fires a selection haptic. The
+/// active tab is also shown *structurally* — icon + label inside a neutral
 /// capsule highlight — so it doesn't rely on colour perception (same rule
 /// as visited/not-visited on the Passport).
 struct BottomNavBar: View {
@@ -59,15 +60,29 @@ struct BottomNavBar: View {
                 }
             }
         }
-        .padding(.horizontal, Theme.Space.s)
-        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 6)
         .frame(height: Theme.Size.navPill)
-        .background(Theme.Palette.surface.ignoresSafeArea(edges: .bottom))
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(Theme.Palette.border)
-                .frame(height: 0.5)
-        }
+        .background(Theme.Palette.surface, in: .capsule)
+        .overlay(Capsule().strokeBorder(Theme.Palette.border, lineWidth: 0.5))
+        .shadow(color: Color.black.opacity(0.12), radius: 16, x: 0, y: 6)
+        .padding(.horizontal, Theme.Space.xl)
+        .padding(.bottom, Theme.Space.m)
+        .sensoryFeedback(.selection, trigger: selection)
+    }
+}
+
+/// Touch feedback for the nav tabs — a springy scale + dim on press so the
+/// bubble reacts under the finger. Plain dim only when Reduce Motion is on.
+private struct TabPressStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.86 : 1)
+            .opacity(configuration.isPressed ? 0.7 : 1)
+            .animation(reduceMotion ? .easeOut(duration: 0.12)
+                                    : .spring(response: 0.3, dampingFraction: 0.55),
+                       value: configuration.isPressed)
     }
 }
 
@@ -114,7 +129,7 @@ private struct TabItem: View {
             }
             .contentShape(.capsule)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(TabPressStyle())
         .accessibilityLabel(tab.title)
         .accessibilityAddTraits(isActive ? [.isButton, .isSelected] : .isButton)
         .accessibilityHint(badged ? "There's a new update on this tab" : "")
