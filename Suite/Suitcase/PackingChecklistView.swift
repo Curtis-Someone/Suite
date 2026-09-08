@@ -182,6 +182,24 @@ struct PackingChecklistView: View {
                     .foregroundStyle(Theme.Palette.textTertiary)
             }
             .padding(.top, 9)
+
+            if !isDone && totalCount > 0 {
+                HStack {
+                    Spacer()
+                    Button { selectAll() } label: {
+                        Text("Select all")
+                            .font(.archivo(13, .semibold))
+                            .foregroundStyle(allPacked ? Theme.Palette.textTertiary : Theme.Palette.accent)
+                            .padding(.horizontal, 14)
+                            .frame(height: 32)
+                            .overlay(Capsule().strokeBorder(allPacked ? Theme.Palette.border : Theme.Palette.accent.opacity(0.5)))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(allPacked)
+                    .accessibilityLabel("Select all items")
+                }
+                .padding(.top, 12)
+            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
@@ -304,6 +322,16 @@ struct PackingChecklistView: View {
         item.sortOrder = (suitcase.items.map(\.sortOrder).max() ?? 0) + 1
         suitcase.items.append(item)
         try? context.save()
+    }
+
+    private func selectAll() {
+        guard let suitcase, !isDone else { return }
+        let wasAllPacked = allPacked
+        for item in suitcase.items { item.isPacked = true }
+        try? context.save()
+        if !wasAllPacked {
+            RewardEngine.suitcasePacked(trip: trip, itemCount: suitcase.items.count)
+        }
     }
 
     private func markComplete() {
