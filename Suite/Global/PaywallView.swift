@@ -29,7 +29,7 @@ struct PaywallView: View {
         ZStack(alignment: .top) {
             Theme.Palette.ground.ignoresSafeArea()
 
-            WorldMapView(visited: visitedCodes, interactive: false)
+            WorldMapView(visited: visitedCodes, interactive: false, scheme: .dark)
                 .allowsHitTesting(false)
                 .frame(height: 300)
                 .overlay(

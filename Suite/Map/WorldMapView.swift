@@ -1,8 +1,11 @@
 import SwiftUI
 
-/// Flat vector world map, styled to the app's dark map surface. Pinch to zoom,
-/// drag to pan. Visited countries fill solid amber. Vector, so it stays crisp
-/// at any zoom.
+/// Flat vector world map. Pinch to zoom, drag to pan. Visited countries fill
+/// solid amber. Vector, so it stays crisp at any zoom. Follows the app theme:
+/// a night-map surface in dark, the handoff's pale paper map in light. Pass
+/// `scheme: .dark` to pin it dark regardless of the system setting — the
+/// Share-card and paywall heroes do this, as they sit under a heavy dark
+/// gradient with white text in both appearances.
 struct WorldMapView: View {
     var visited: Set<String>
     /// Countries on the want-to-go list — drawn as a hollow amber tint.
@@ -12,21 +15,32 @@ struct WorldMapView: View {
     /// When set, frames on this country and only fills it.
     var focus: String? = nil
     var interactive: Bool = true
+    /// Pin the map palette to one appearance, ignoring the system setting.
+    var scheme: ColorScheme? = nil
     var onTapCountry: ((String) -> Void)? = nil
 
+    @Environment(\.colorScheme) private var systemScheme
     @State private var zoom: CGFloat = 2.9
     @State private var pan: CGSize = .zero
     @GestureState private var pinch: CGFloat = 1
     @GestureState private var drag: CGSize = .zero
 
-    // Dark map palette — this surface is always dark (like the login hero).
-    private let ground = Color(hex: 0x0E1012)
-    private let land   = Color(hex: 0x2B2E33)
-    private let landDim = Color(hex: 0x212327)
-    private let border = Color(hex: 0x3B3E44)
+    private var isDark: Bool { (scheme ?? systemScheme) == .dark }
+
+    // Map palette. Dark = the app's hand-tuned night-map surface. Light = the
+    // Claude Design handoff's Map-tab palette (MAPCFG): pale taupe land on a
+    // white ocean, hairline white country borders.
+    private var ground:  Color { isDark ? Color(hex: 0x0E1012) : Color(hex: 0xFFFFFF) }
+    private var land:    Color { isDark ? Color(hex: 0x2B2E33) : Color(hex: 0xDEDAD2) }
+    private var landDim: Color { isDark ? Color(hex: 0x212327) : Color(hex: 0xEBE8E1) }
+    private var border:  Color { isDark ? Color(hex: 0x3B3E44) : Color(hex: 0xFFFFFF) }
     // Want-to-go: a solid muted gold, clearly dimmer than the visited amber.
-    private let wishFill   = Color(hex: 0x7C6636)
-    private let wishBorder = Color(hex: 0xA98A4E)
+    private var wishFill:   Color { isDark ? Color(hex: 0x7C6636) : Color(hex: 0xE7CE9E) }
+    private var wishBorder: Color { isDark ? Color(hex: 0xA98A4E) : Color(hex: 0xC9A057) }
+    // Outline on the country whose sheet is open.
+    private var highlightStroke: Color { isDark ? Color.white.opacity(0.9) : Color(hex: 0x1A1A1A).opacity(0.65) }
+    // Centroid label on a non-visited country (visited ones use dark-on-amber).
+    private var labelInk: Color { isDark ? Color(hex: 0x8A857E) : Color(hex: 0x77736C) }
 
     var body: some View {
         GeometryReader { geo in
@@ -62,7 +76,7 @@ struct WorldMapView: View {
                     if isWished {
                         ctx.stroke(c.path, with: .color(wishBorder), lineWidth: 0.9 * hair)
                     } else if c.iso == highlight {
-                        ctx.stroke(c.path, with: .color(.white.opacity(0.9)), lineWidth: 1.4 * hair)
+                        ctx.stroke(c.path, with: .color(highlightStroke), lineWidth: 1.4 * hair)
                     } else {
                         ctx.stroke(c.path, with: .color(border), lineWidth: 0.5 * hair)
                     }
@@ -82,7 +96,7 @@ struct WorldMapView: View {
                     ctx.draw(
                         Text(name)
                             .font(.system(size: 10.5, weight: .medium))
-                            .foregroundStyle(onAmber ? Color(hex: 0x1A130A) : Color(hex: 0x8A857E)),
+                            .foregroundStyle(onAmber ? Color(hex: 0x1A130A) : labelInk),
                         at: at)
                 }
             }
