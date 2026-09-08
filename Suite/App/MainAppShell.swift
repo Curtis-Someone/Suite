@@ -16,16 +16,18 @@ struct MainAppShell: View {
     }()
 
     var body: some View {
-        // A paged TabView so a horizontal finger-swipe moves between tabs;
-        // the custom pill stays the visible control, bound to the same selection.
-        TabView(selection: $tab) {
-            MapTabView().tag(SuiteTab.map)
-            SuitcaseTabView().tag(SuiteTab.suitcase)
-            PassportTabView().tag(SuiteTab.passport)
+        // One tab at a time, switched by the pill. No horizontal pager: the
+        // Map tab needs every finger-drag for panning the world map.
+        Group {
+            switch tab {
+            case .map:      MapTabView()
+            case .suitcase: SuitcaseTabView()
+            case .passport: PassportTabView()
+            }
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        .ignoresSafeArea(edges: .top)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // The pill floats *over* the content; `safeAreaInset` still reserves its
+        // footprint so scrollable content stops clear of it.
         .safeAreaInset(edge: .bottom, spacing: 0) {
             BottomNavBar(selection: $tab)
         }
