@@ -16,15 +16,15 @@ struct MainAppShell: View {
     }()
 
     var body: some View {
-        // A paged TabView so a horizontal finger-swipe moves between tabs;
-        // the custom bottom bar stays the visible control, bound to the same selection.
-        TabView(selection: $tab) {
-            MapTabView().tag(SuiteTab.map)
-            SuitcaseTabView().tag(SuiteTab.suitcase)
-            PassportTabView().tag(SuiteTab.passport)
+        // One screen at a time, switched by the bottom bar. No horizontal
+        // pager — the Map tab needs every finger-drag for panning the map.
+        Group {
+            switch tab {
+            case .map:      MapTabView()
+            case .suitcase: SuitcaseTabView()
+            case .passport: PassportTabView()
+            }
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        .ignoresSafeArea(edges: .top)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         // The pill is a pure overlay — it reserves no layout space, so the tab
         // content runs full-bleed to the screen edge and scrolls *behind* it

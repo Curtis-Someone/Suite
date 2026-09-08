@@ -101,11 +101,7 @@ struct WorldMapView: View {
                 }
             }
             .contentShape(Rectangle())
-            .gesture(interactive ? pinchGesture : nil)
-            // The map owns finger drags at any zoom so you can pan freely;
-            // switch tabs with the bottom pill. highPriority so the drag wins
-            // over the paged TabView's swipe.
-            .highPriorityGesture(interactive ? panGesture : nil)
+            .gesture(interactive ? mapGesture : nil)
             .onTapGesture { loc in
                 guard interactive, focus == nil, let onTapCountry else { return }
                 let unit = loc.applying(t.inverted())
@@ -119,24 +115,25 @@ struct WorldMapView: View {
 
     // MARK: Gestures
 
-    private var pinchGesture: some Gesture {
-        MagnificationGesture()
-            .updating($pinch) { value, state, _ in state = value }
-            .onEnded { value in
-                let newZoom = min(24, max(1.6, zoom * value))
-                // Bake the same factor into the pan so the point under the
-                // screen centre stays put when the live gesture ends.
-                let applied = newZoom / zoom
-                pan.width *= applied
-                pan.height *= applied
-                zoom = newZoom
-            }
-    }
-
-    private var panGesture: some Gesture {
-        DragGesture(minimumDistance: 3)
-            .updating($drag) { value, state, _ in state = value.translation }
-            .onEnded { pan.width += $0.translation.width; pan.height += $0.translation.height }
+    /// Pinch to zoom and one-finger drag to pan, recognised together so a
+    /// two-finger gesture can do both at once.
+    private var mapGesture: some Gesture {
+        SimultaneousGesture(
+            MagnificationGesture()
+                .updating($pinch) { value, state, _ in state = value }
+                .onEnded { value in
+                    let newZoom = min(24, max(1.6, zoom * value))
+                    // Bake the same factor into the pan so the point under the
+                    // screen centre stays put when the live gesture ends.
+                    let applied = newZoom / zoom
+                    pan.width *= applied
+                    pan.height *= applied
+                    zoom = newZoom
+                },
+            DragGesture()
+                .updating($drag) { value, state, _ in state = value.translation }
+                .onEnded { pan.width += $0.translation.width; pan.height += $0.translation.height }
+        )
     }
 
     // MARK: Projection → view
