@@ -22,7 +22,7 @@ struct PackingListDocument: View {
     let packedCount: Int
     let totalCount: Int
 
-    private let ink = Color(hex: 0x0A0A0A)
+    private let ink = Color(hex: 0x14161A)
     private let sub = Color(hex: 0x77736C)
     private let hair = Color(hex: 0xE2DED7)
     private let accent = Color(hex: 0xD09A42)

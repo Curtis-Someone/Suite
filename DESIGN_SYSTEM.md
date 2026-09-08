@@ -37,8 +37,8 @@ dark artboards.
 | `track` | `#E0DCD4` | `#2E2E30` | Progress-bar track, inactive toggle |
 | `accent` | `#D09A42` | `#D09A42` | The one accent (unchanged both modes) |
 | `accentHigh` | `#E8B75F` | `#E8B75F` | Link hover / pressed emphasis |
-| `onAccent` | `#0A0A0A` | `#0A0A0A` | Text/glyph on an amber fill (amber stays light) |
-| `textPrimary` | `#0A0A0A` | `#FFFFFF` | Primary text, display, CTA label on amber |
+| `onAccent` | `#14161A` | `#14161A` | Text/glyph on an amber fill (amber stays light) |
+| `textPrimary` | `#14161A` | `#FFFFFF` | Primary text, display, CTA label on amber |
 | `textHeading` | `#14161A` | `#F2F0EC` | Dark-chrome text, line-icon strokes |
 | `textBody` | `#4A4740` | `#C9C4BC` | Body-strong |
 | `textSecondary` | `#77736C` | `#8A857E` | Secondary copy |
@@ -55,8 +55,8 @@ dark artboards.
 so the v1.1 dark theme is a catalog edit rather than new code. `navHighlight` is
 `navInk` at 8% opacity.
 
-The auth-screen hero panel is a fixed `#0A0A0A` in **both** modes (deliberate
-night-map treatment).
+The auth-screen hero panel is a fixed `#14161A` in **both** modes (deliberate
+night-map treatment) — same near-black as `textHeading`.
 
 Single-accent rule holds. **One deliberate exception** (from `CLAUDE.md` + compendium):
 full-colour category / flag icons on the Map and suitcase-builder screens carry identity
@@ -133,7 +133,7 @@ Screen chrome: content typically starts ~56–64 px from the top edge; primary C
 | `cta` | 58 | Full-width primary CTA on a screen (radius = capsule, 29) |
 | `ctaCompact` | 54 | CTA inside a form / sheet (radius 27) |
 | `field` | 52 | Input row (single fields render 50–56; grouped rows 50–52) |
-| `navPill` | 56 | Floating glass nav pill height — capsule, `.ultraThinMaterial`, 0.5px white hairline, soft shadow; 24px side margins, 16px above the bottom safe area |
+| `navPill` | 56 | Floating nav pill height — capsule, **solid `surface` fill** (not `.ultraThinMaterial`), 0.5px `border` hairline, soft shadow; inset from the screen edges (`Space.xl` sides, `Space.m` above the bottom safe area) |
 | `tabIcon` | 28 | Nav-bar icon box (pill glyphs render at 22) |
 | `progressBar` | 10 | Track height; radius 5; amber fill; also used per-row at 8px |
 
@@ -165,12 +165,14 @@ Circular gauge: SVG ring, `track` under-stroke + `accent` over-stroke, stroke wi
   (`Country.flag`, from Unicode regional-indicator symbols), OS-rendered at ~26pt,
   no fill or border. Selected/visited state reads from the row, not the chip.
   Missing-flag fallback: `track` fill + `textDisabled` glyph.
-- **Bottom nav** — floating glass pill (`.ultraThinMaterial` capsule, 0.5px white
-  hairline, soft shadow), 3 tabs in order **map · suitcase · passport**. Inactive:
-  Lucide glyph only, `navInk` at 55%. Active: glyph **+ label** side by side on a
-  `navHighlight` capsule (neutral, colour-independent — like visited/not-visited on
-  the Passport), both tinted `navAmber`. Selection change animates `.snappy`,
-  suppressed under Reduce Motion. Optional brand-amber badge dot, top-right of a glyph.
+- **Bottom nav** — floating pill: **solid `surface` capsule** (not `.ultraThinMaterial`
+  glass), 0.5px `border` hairline, soft shadow, inset from the screen edges. 3 tabs in
+  order **map · suitcase · passport**. Inactive: glyph only, `navInk` at 55%. Active:
+  glyph **+ label** side by side on a `navHighlight` capsule (neutral, colour-independent
+  — like visited/not-visited on the Passport), both tinted `navAmber`. Tapping a tab is
+  reactive — the pressed tab springs down (`TabPressStyle`), plus a selection haptic.
+  Selection change animates `.snappy`, suppressed under Reduce Motion. Optional
+  brand-amber badge dot, top-right of a glyph.
 - **Selected checkmark** — `accent` filled circle, `onAccent` tick.
 - **Toggle switch** — 50×30 capsule; on = `accent` track + white knob; off = `track` +
   `textTertiary` knob.
@@ -184,9 +186,11 @@ Circular gauge: SVG ring, `track` under-stroke + `accent` over-stroke, stroke wi
 closer to the canvas `sw`). Accessed via `SuiteIcon` / `SuiteIconView`, which tints with
 `.foregroundStyle`. Round caps/joins, no fill.
 
-The bottom-nav tabs are Lucide too — `map` / `luggage` / `book-open`, template-mode
-and tinted in code (`BottomNavBar.swift`). The active state is now structural (label
-reveal + neutral capsule), so the old bespoke filled-amber glyphs are retired.
+The bottom-nav tabs mix sources: **`map`** is the Lucide glyph; **`suitcase`** and
+**`passport`** are custom line-art PNGs in `Assets.xcassets/Nav/` (`@1x/2x/3x`, drawn to
+match the Lucide 1.75 stroke). All three render template-mode and are tinted in code
+(`BottomNavBar.swift`). The active state is structural (label reveal + neutral capsule),
+so the old bespoke filled-amber glyphs are retired.
 
 Full-colour category / flag icons on Map + suitcase-builder screens are a separate,
 deliberate multi-colour exception (§1).

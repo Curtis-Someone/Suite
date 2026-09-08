@@ -39,9 +39,9 @@ enum Theme {
         /// Hover / pressed emphasis for the accent (links).
         static let accentHigh    = Color(hex: 0xE8B75F)
         /// Text / glyph colour on top of an amber fill (amber works in both modes).
-        static let onAccent      = Color(hex: 0x0A0A0A)
+        static let onAccent      = Color(hex: 0x14161A)
 
-        static let textPrimary   = Color(light: 0x0A0A0A, dark: 0xFFFFFF)
+        static let textPrimary   = Color(light: 0x14161A, dark: 0xFFFFFF)
         /// Headings in dark UI chrome, icon strokes.
         static let textHeading   = Color(light: 0x14161A, dark: 0xF2F0EC)
         static let textBody      = Color(light: 0x4A4740, dark: 0xC9C4BC)
