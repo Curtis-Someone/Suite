@@ -28,3 +28,10 @@ final class VisitedPlace {
         self.sourceTripID = sourceTripID
     }
 }
+
+extension VisitedPlace {
+    /// Stamps the "Visited" toggle must never delete: the onboarding home-country
+    /// seed and any stamp auto-added by completing a trip. Both are meant to be
+    /// permanent — only manually-added visits can be removed via that control.
+    var isProtectedStamp: Bool { isHomeCountry || sourceTripID != nil }
+}

@@ -9,6 +9,8 @@ struct AddVisitView: View {
     @Query private var visits: [VisitedPlace]
 
     @State private var query = ""
+    @State private var confirmRemoval: Country?
+    @State private var protectedNotice: Country?
 
     private var visitedCodes: Set<String> {
         Set(visits.map { $0.countryCode.uppercased() })
@@ -61,6 +63,34 @@ struct AddVisitView: View {
         }
         .background(Theme.Palette.ground.ignoresSafeArea())
         .presentationDragIndicator(.visible)
+        .alert(
+            "Remove this country?",
+            isPresented: Binding(get: { confirmRemoval != nil },
+                                 set: { if !$0 { confirmRemoval = nil } }),
+            presenting: confirmRemoval
+        ) { country in
+            Button("Remove", role: .destructive) { removeVisits(for: country) }
+            Button("Cancel", role: .cancel) { }
+        } message: { _ in
+            Text("Remove this country from your visited list? This can't be undone.")
+        }
+        .alert(
+            "This one stays",
+            isPresented: Binding(get: { protectedNotice != nil },
+                                 set: { if !$0 { protectedNotice = nil } }),
+            presenting: protectedNotice
+        ) { _ in
+            Button("OK", role: .cancel) { }
+        } message: { country in
+            Text(noticeMessage(for: country))
+        }
+    }
+
+    private func noticeMessage(for country: Country) -> String {
+        let stamps = visits.filter { $0.countryCode.uppercased() == country.code }
+        return stamps.contains { $0.isHomeCountry }
+            ? "\(country.name) is your home country, so it stays on your map. It can't be removed here."
+            : "\(country.name) came from a completed trip, so it stays stamped. It can't be removed here."
     }
 
     private func row(_ country: Country, isVisited: Bool) -> some View {
@@ -96,8 +126,11 @@ struct AddVisitView: View {
 
     private func toggle(_ country: Country, isVisited: Bool) {
         if isVisited {
-            for place in visits where place.countryCode.uppercased() == country.code {
-                context.delete(place)
+            let stamps = visits.filter { $0.countryCode.uppercased() == country.code }
+            if stamps.allSatisfy(\.isProtectedStamp) {
+                protectedNotice = country
+            } else {
+                confirmRemoval = country
             }
         } else {
             context.insert(VisitedPlace(countryName: country.name, countryCode: country.code))
@@ -105,7 +138,13 @@ struct AddVisitView: View {
             RewardEngine.countryAdded(
                 code: country.code,
                 visitsAfter: (try? context.fetch(FetchDescriptor<VisitedPlace>())) ?? [])
-            return
+        }
+    }
+
+    private func removeVisits(for country: Country) {
+        for place in visits where place.countryCode.uppercased() == country.code
+            && !place.isProtectedStamp {
+            context.delete(place)
         }
         try? context.save()
     }

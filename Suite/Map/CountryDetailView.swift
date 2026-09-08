@@ -13,6 +13,9 @@ struct CountryDetailView: View {
     @State private var tab: Tab = .cities
     private enum Tab { case cities, regions }
 
+    @State private var confirmRemoval = false
+    @State private var showProtectedNotice = false
+
     private var code: String { iso.uppercased() }
     private var country: Country? { Countries.all.first { $0.code == code } }
 
@@ -57,6 +60,23 @@ struct CountryDetailView: View {
         .presentationDetents([.height(430), .large])
         .presentationDragIndicator(.visible)
         .presentationBackground(Theme.Palette.ground)
+        .alert("Remove this country?", isPresented: $confirmRemoval) {
+            Button("Remove", role: .destructive) { removeVisited() }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Remove this country from your visited list? This can't be undone.")
+        }
+        .alert("This one stays", isPresented: $showProtectedNotice) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(protectedNoticeMessage)
+        }
+    }
+
+    private var protectedNoticeMessage: String {
+        visits.contains { $0.isHomeCountry }
+            ? "This is your home country, so it stays on your map. It can't be removed here."
+            : "This came from a completed trip, so it stays stamped. It can't be removed here."
     }
 
     // MARK: header
@@ -189,8 +209,13 @@ struct CountryDetailView: View {
 
     private func toggleVisited() {
         if countryVisited {
-            for v in visits { context.delete(v) }
-            try? context.save()
+            // Only manually-added visits can go. If every stamp for this country
+            // is protected (home seed / trip-sourced), offer nothing to delete.
+            if visits.allSatisfy(\.isProtectedStamp) {
+                showProtectedNotice = true
+            } else {
+                confirmRemoval = true
+            }
         } else {
             context.insert(VisitedPlace(countryName: country?.name ?? iso, countryCode: code))
             try? context.save()
@@ -198,6 +223,11 @@ struct CountryDetailView: View {
                 code: code,
                 visitsAfter: (try? context.fetch(FetchDescriptor<VisitedPlace>())) ?? [])
         }
+    }
+
+    private func removeVisited() {
+        for v in visits where !v.isProtectedStamp { context.delete(v) }
+        try? context.save()
     }
 
     private func toggleWanted() {
