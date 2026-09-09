@@ -16,6 +16,7 @@ struct TripDetailView: View {
     private let entitlements = Entitlements.shared
 
     @State private var showingBuilder = false
+    @State private var showingEdit = false
     @State private var upsell: UpsellMoment?
     @State private var confirmDeleteTrip = false
     @State private var suitcaseToDelete: Suitcase?
@@ -49,6 +50,9 @@ struct TripDetailView: View {
         .toolbar(.hidden, for: .navigationBar)
         .fullScreenCover(isPresented: $showingBuilder) {
             NewSuitcaseFlow(trip: trip) { _ in }
+        }
+        .fullScreenCover(isPresented: $showingEdit) {
+            EditTripFlow(trip: trip)
         }
         .sheet(item: $upsell) { UpsellSheet(moment: $0) }
         .alert("Delete this trip?", isPresented: $confirmDeleteTrip) {
@@ -86,6 +90,7 @@ struct TripDetailView: View {
                 }
                 .accessibilityLabel("Delete trip")
                 Menu {
+                    Button("Edit trip details") { showingEdit = true }
                     if isDone {
                         Button("Reopen trip") { reopen() }
                     } else {
