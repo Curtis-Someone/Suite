@@ -54,10 +54,28 @@ struct PackingChecklistView: View {
                         sectionCard(section.category, section.items)
                     }
                     if sections.isEmpty {
-                        Text("No items yet. Add some below.")
-                            .font(.Suite.bodyS)
-                            .foregroundStyle(Theme.Palette.textTertiary)
-                            .padding(.top, 40)
+                        VStack(spacing: 16) {
+                            Text(isDone ? "No items." : "No items yet.")
+                                .font(.Suite.bodyS)
+                                .foregroundStyle(Theme.Palette.textTertiary)
+                            if !isDone {
+                                Button { addingTo = .misc } label: {
+                                    HStack(spacing: 8) {
+                                        SuiteIconView(icon: .plus, size: 14, color: Theme.Palette.accent)
+                                        Text("Add item")
+                                            .font(.archivo(13, .semibold))
+                                            .foregroundStyle(Theme.Palette.accent)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .frame(height: 38)
+                                    .overlay(Capsule().strokeBorder(Theme.Palette.accent.opacity(0.5)))
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Add item")
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 40)
                     }
                 }
                 .padding(.horizontal, 20)
