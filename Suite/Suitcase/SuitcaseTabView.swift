@@ -13,6 +13,7 @@ struct SuitcaseTabView: View {
     @State private var upsell: UpsellMoment?
     @State private var path = NavigationPath()
     @State private var didApplyDevArgs = false
+    @State private var tripToDelete: Trip?
 
     private var upcoming: [Trip] { trips.filter { !$0.isArchived && $0.status != .past } }
     private var past: [Trip] { trips.visibleArchive(isPro: entitlements.isPro) }
@@ -55,6 +56,15 @@ struct SuitcaseTabView: View {
         .sheet(isPresented: $showingSearch) { SearchView() }
         .sheet(isPresented: $showingProfile) { ProfileView() }
         .sheet(item: $upsell) { UpsellSheet(moment: $0) }
+        .alert("Delete this trip?",
+               isPresented: Binding(get: { tripToDelete != nil },
+                                    set: { if !$0 { tripToDelete = nil } }),
+               presenting: tripToDelete) { trip in
+            Button("Delete", role: .destructive) { delete(trip) }
+            Button("Cancel", role: .cancel) {}
+        } message: { trip in
+            Text("This deletes “\(trip.name)” and its suitcases. This can't be undone.")
+        }
         .task { applyDevArgs() }
     }
 
@@ -153,6 +163,16 @@ struct SuitcaseTabView: View {
     private func link(_ trip: Trip) -> some View {
         NavigationLink(value: trip) { TripCardView(trip: trip) }
             .buttonStyle(.suitePress)
+            .contextMenu {
+                Button(role: .destructive) { tripToDelete = trip } label: {
+                    Label("Delete trip", systemImage: "trash")
+                }
+            }
+    }
+
+    private func delete(_ trip: Trip) {
+        context.delete(trip)
+        try? context.save()
     }
 
     private var addCard: some View {
