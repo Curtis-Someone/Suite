@@ -9,6 +9,7 @@ struct PackingChecklistView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let entitlements = Entitlements.shared
 
     @State private var collapsed: Set<ItemCategory> = []
@@ -67,6 +68,11 @@ struct PackingChecklistView: View {
         .background(Theme.Palette.ground.ignoresSafeArea())
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        // One haptic per change in packed count — a single tap or a whole
+        // "Select all" batch each fire once, not once per item.
+        .sensoryFeedback(trigger: packedCount) { old, new in
+            new > old ? .impact(weight: .light, intensity: 0.7) : .selection
+        }
         .task { await WeatherService.refresh(for: trip, in: context) }
         .task {
             if ProcessInfo.processInfo.arguments.contains("-exportPDF") { showExport = true }
@@ -173,10 +179,12 @@ struct PackingChecklistView: View {
                 Text("\(percent)% ready · \(packedCount)/\(totalCount) packed")
                     .font(.archivo(13, .semibold))
                     .foregroundStyle(Theme.Palette.textPrimary)
+                    .contentTransition(.numericText())
                 Spacer()
                 Text(isDone ? "done" : "\(max(0, totalCount - packedCount)) to go")
                     .font(.jetBrainsMono(12))
                     .foregroundStyle(Theme.Palette.textTertiary)
+                    .contentTransition(.numericText())
             }
             .padding(.top, 9)
         }
@@ -195,11 +203,14 @@ struct PackingChecklistView: View {
         return VStack(spacing: 0) {
             HStack(spacing: 10) {
                 Button {
-                    if isCollapsed { collapsed.remove(category) } else { collapsed.insert(category) }
+                    withAnimation(Theme.Motion.expand.gated(reduceMotion)) {
+                        if isCollapsed { collapsed.remove(category) } else { collapsed.insert(category) }
+                    }
                 } label: {
                     HStack(spacing: 10) {
-                        SuiteIconView(icon: isCollapsed ? .chevronRight : .chevronDown,
+                        SuiteIconView(icon: .chevronDown,
                                       size: 14, color: Theme.Palette.textPrimary)
+                            .rotationEffect(.degrees(isCollapsed ? -90 : 0))
                         Text(category.displayName)
                             .font(.archivo(14, .bold))
                             .foregroundStyle(isDone ? Theme.Palette.textSecondary : Theme.Palette.textPrimary)
@@ -207,6 +218,7 @@ struct PackingChecklistView: View {
                         Text("\(packed)/\(items.count)")
                             .font(.jetBrainsMono(12, .medium))
                             .foregroundStyle(packed == items.count ? Theme.Palette.textTertiary : Theme.Palette.accent)
+                            .contentTransition(.numericText())
                     }
                     .contentShape(Rectangle())
                 }
@@ -228,22 +240,28 @@ struct PackingChecklistView: View {
             .frame(height: 50)
 
             if !isCollapsed {
-                ForEach(items) { item in
-                    Divider().overlay(Theme.Palette.divider)
-                    row(item)
-                }
-                if !isDone {
-                    Divider().overlay(Theme.Palette.divider)
-                    Button { addingTo = category } label: {
-                        HStack(spacing: 10) {
-                            SuiteIconView(icon: .plus, size: 14, color: Theme.Palette.textTertiary)
-                            Text("Add item").font(.archivo(13)).foregroundStyle(Theme.Palette.textTertiary)
-                            Spacer()
+                VStack(spacing: 0) {
+                    ForEach(items) { item in
+                        VStack(spacing: 0) {
+                            Divider().overlay(Theme.Palette.divider)
+                            row(item)
                         }
-                        .frame(height: 44)
+                        .transition(.move(edge: .leading).combined(with: .opacity))
                     }
-                    .buttonStyle(.plain)
+                    if !isDone {
+                        Divider().overlay(Theme.Palette.divider)
+                        Button { addingTo = category } label: {
+                            HStack(spacing: 10) {
+                                SuiteIconView(icon: .plus, size: 14, color: Theme.Palette.textTertiary)
+                                Text("Add item").font(.archivo(13)).foregroundStyle(Theme.Palette.textTertiary)
+                                Spacer()
+                            }
+                            .frame(height: 44)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
+                .transition(.opacity)
             }
         }
         .padding(.horizontal, 16)
@@ -256,7 +274,9 @@ struct PackingChecklistView: View {
             Button {
                 guard !isDone else { return }
                 let wasAllPacked = allPacked
-                item.isPacked.toggle()
+                withAnimation(Theme.Motion.reactive.gated(reduceMotion)) {
+                    item.isPacked.toggle()
+                }
                 try? context.save()
                 if !wasAllPacked, allPacked {
                     RewardEngine.suitcasePacked(trip: trip, itemCount: suitcase.items.count)
@@ -267,8 +287,10 @@ struct PackingChecklistView: View {
                     .overlay {
                         if item.isPacked {
                             SuiteIconView(icon: .check, size: 13, color: isDone ? Theme.Palette.fill : Theme.Palette.onAccent)
+                                .transition(.scale(scale: 0.4).combined(with: .opacity))
                         } else {
                             RoundedRectangle(cornerRadius: 7).strokeBorder(Theme.Palette.track, lineWidth: 1.6)
+                                .transition(.opacity)
                         }
                     }
                     .frame(width: 22, height: 22)
@@ -284,13 +306,16 @@ struct PackingChecklistView: View {
                 .font(.archivo(14, item.isPacked ? .regular : .medium))
                 .foregroundStyle(item.isPacked ? Theme.Palette.textTertiary : Theme.Palette.textPrimary)
                 .strikethrough(item.isPacked, color: Theme.Palette.textTertiary)
+                .contentTransition(.numericText())
 
             Spacer()
 
             if !isDone {
                 HStack(spacing: 0) {
                     Button {
-                        item.quantity += 1
+                        withAnimation(Theme.Motion.reactive.gated(reduceMotion)) {
+                            item.quantity += 1
+                        }
                         try? context.save()
                     } label: {
                         SuiteIconView(icon: .plus, size: 12, color: Theme.Palette.textDisabled)
@@ -303,7 +328,9 @@ struct PackingChecklistView: View {
                     .accessibilityLabel("Add one \(item.name)")
 
                     Button {
-                        context.delete(item)
+                        withAnimation(Theme.Motion.expand.gated(reduceMotion)) {
+                            context.delete(item)
+                        }
                         try? context.save()
                     } label: {
                         SuiteIconView(icon: .close, size: 12, color: Theme.Palette.textDisabled)
@@ -330,15 +357,23 @@ struct PackingChecklistView: View {
         guard let category = addingTo, !trimmed.isEmpty else { return }
         let item = Item(name: trimmed, category: category, suitcase: suitcase)
         item.sortOrder = (suitcase.items.map(\.sortOrder).max() ?? 0) + 1
-        suitcase.items.append(item)
+        withAnimation(Theme.Motion.expand.gated(reduceMotion)) {
+            suitcase.items.append(item)
+        }
         try? context.save()
     }
 
-    /// Marks every item in one packing section packed.
+    /// Marks every item in one packing section packed — ticking them off
+    /// top-to-bottom rather than all at once. Instant under Reduce Motion.
     private func selectAll(_ items: [Item]) {
         guard !isDone else { return }
         let wasAllPacked = allPacked
-        for item in items { item.isPacked = true }
+        for (i, item) in items.enumerated() where !item.isPacked {
+            withAnimation(Theme.Motion.reactive.gated(reduceMotion)?
+                .delay(Double(i) * Theme.Motion.staggerStep)) {
+                item.isPacked = true
+            }
+        }
         try? context.save()
         if !wasAllPacked, allPacked {
             RewardEngine.suitcasePacked(trip: trip, itemCount: suitcase.items.count)

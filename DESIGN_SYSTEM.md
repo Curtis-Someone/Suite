@@ -242,3 +242,31 @@ before building.)*
    (open/packed suitcase), `uploads/d5599fe2…png` (passport spread) exceed the design
    MCP's 256 KB read cap and could not be pulled in full. Raw look-alikes exist in
    `Diseño/Elements/`. Need full-res exports before the onboarding/tour screens (batch 4).
+
+---
+
+## 10. Motion
+
+One small vocabulary of springs, defined once in `Theme.Motion` (`Theme.swift`), so
+every reactive surface moves the same way. Not from the static handoff — added to make
+direct-manipulation surfaces feel responsive.
+
+| Token | Curve | Use |
+|---|---|---|
+| `Motion.reactive` | `.snappy(0.28, extraBounce: 0.12)` | Immediate tap response — checkbox tick, toggle knob, chip. Tiny overshoot so it snaps under the finger. |
+| `Motion.settle` | `.spring(response: 0.42, damping: 0.9)` | A value catching up — a progress bar or ring gliding to its new length after items get checked. No bounce. |
+| `Motion.expand` | `.snappy(0.26)` | Layout opening / closing — a packing section collapsing, rows sliding in and out of a list. |
+| `Motion.staggerStep` | `0.035s` | Per-row delay unit for a top-to-bottom cascade (e.g. "Select all"). Multiply by row index. |
+
+**Reduce Motion.** Every animated call site reads `\.accessibilityReduceMotion` and gates
+the token with `.gated(reduceMotion)` (an `Animation` extension), which returns `nil`
+(instant change) when the user has asked for less motion. State still updates; only the
+tween is dropped.
+
+**Haptics.** Direct-manipulation surfaces pair motion with `.sensoryFeedback`: `.impact`
+(light) on a positive commit (packing an item, tab select), `.selection` on the inverse.
+Batch actions fire one haptic for the whole batch, not one per row.
+
+**Applied so far:** bottom nav (tab spring + selection haptic), `SuiteSwitch`,
+`SuiteProgressBar` / `CircularGauge` (glide on value change), and the S3 packing
+checklist (checkbox tick, section expand/collapse, "Select all" cascade, row add/delete).

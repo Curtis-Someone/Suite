@@ -134,6 +134,41 @@ enum Theme {
         static let sizeL: CGFloat  = 24   // standard
     }
 
+    // MARK: Motion
+    //
+    // One small vocabulary of springs so every reactive surface (checkbox,
+    // toggle, progress fill, section expand) moves the same way. Call sites
+    // that already read `\.accessibilityReduceMotion` gate a token with
+    // `.gated(reduceMotion)` (see the `Animation` extension below), which
+    // returns `nil` — an instant change — when the user has asked for less
+    // motion.
+    enum Motion {
+        /// Immediate tap response — a checkbox tick, a toggle knob, a chip.
+        /// Fast, tiny overshoot so it feels like it snaps under the finger.
+        static let reactive = Animation.snappy(duration: 0.28, extraBounce: 0.12)
+
+        /// A value catching up to a new state — a progress bar or ring
+        /// gliding to its new length after items get checked. No bounce.
+        static let settle = Animation.spring(response: 0.42, dampingFraction: 0.9)
+
+        /// Layout opening or closing — a packing section collapsing, rows
+        /// sliding in and out of a list.
+        static let expand = Animation.snappy(duration: 0.26)
+
+        /// Per-row delay for a staggered cascade (e.g. "Select all" ticking
+        /// a section top-to-bottom). Multiply by the row index.
+        static let staggerStep: Double = 0.035
+    }
+
     // Fonts (Archivo, JetBrains Mono) are bundled in Resources/Fonts and
     // registered via the `UIAppFonts` key in Info.plist — no code needed.
+}
+
+extension Animation {
+    /// This animation normally, or `nil` (an instant change) under Reduce
+    /// Motion. Use at call sites that already read `\.accessibilityReduceMotion`:
+    /// `withAnimation(Theme.Motion.reactive.gated(reduceMotion)) { … }`.
+    func gated(_ reduceMotion: Bool) -> Animation? {
+        reduceMotion ? nil : self
+    }
 }
