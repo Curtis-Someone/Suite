@@ -121,8 +121,8 @@ struct NewTripFlow: View {
         content()
             .padding(.horizontal, 16)
             .frame(height: 54)
-            .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Theme.Palette.border))
+            .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.chip).strokeBorder(Theme.Palette.border))
     }
 
     @ViewBuilder

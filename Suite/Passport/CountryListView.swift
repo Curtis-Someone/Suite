@@ -47,8 +47,8 @@ struct CountryListView: View {
                         }
                         .padding(.horizontal, 16)
                         .frame(height: 56)
-                        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 14))
-                        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.Palette.border))
+                        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
+                        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.chip).strokeBorder(Theme.Palette.border))
                     }
                 }
                 .padding(.horizontal, 20)

@@ -116,16 +116,25 @@ Screen chrome: content typically starts ~56–64 px from the top edge; primary C
 
 ## 4. Corner radii (`Theme.Radius`)
 
+**One value per tier — always the token, never a raw literal.** Small components
+(list / result rows, small cards, single input fields, icon tiles, filter & accent
+chips) are *all* `chip` (16). The 11–15 spread that had crept in screen to screen was
+consolidated in Design Batch B (§B3) — every app view now references a token.
+
 | Token | px | Applies to |
 |---|---|---|
-| `control` | 8 | Colour swatches, tiny controls |
-| `chip` / `cardS` | 16 | Filter chips, small cards, search-result rows |
-| `card` | 20 | Standard card (stat card, settings group) |
+| `micro` | 5 | Flag / ISO-code chips, tiny colour dots |
+| `control` | 8 | Colour swatches, checkboxes, tiny controls |
+| `chip` / `cardS` | 16 | Filter & accent chips, small cards, list / result rows, icon tiles, single input fields |
+| `card` | 20 | Standard card (trip card, stat card, settings group), dashed "add" rows, info panels |
 | `cardL` | 22 | Large media card, share preview |
-| `fieldGroup` | 18 | Multi-row input group |
+| `fieldGroup` | 18 | Multi-row input group (no current users — kept for when a grouped form returns) |
 | `sheet` | 20 | Bottom-sheet top corners |
 | pill | capsule | CTAs, single input fields, toggles, filter chips, nav dots |
 | `deviceFrame` | 46 | **Canvas only** — never on a real view |
+
+Left deliberately off the scale: `RewardOverlayView` card `26` (its own zone, §10.4),
+`ProBenefitsView` slide `24`, `PackingListPDF` checkbox `4` (print document, not a view).
 
 ---
 
@@ -278,7 +287,7 @@ code leans on them; items marked **RESOLVED** only write down what the build alr
   pairs with an explicit verb ("Delete"), an icon, or inline error text. Any new state
   conveyed by colour alone is a bug.
 
-### 10.2 Haptics — four tiers, one per gesture — PROPOSED
+### 10.2 Haptics — four tiers, one per gesture — CONFIRMED (Ivan, 2026-09-09)
 
 iOS 17 `.sensoryFeedback(_:trigger:)`, declared inline at each trigger (mirrors
 `BottomNavBar`'s `.sensoryFeedback(.selection, trigger: selection)` — no shared helper).
@@ -294,7 +303,7 @@ The OS already honours the user's system haptics setting; no manual gate needed.
 Rules: never stack two haptics on one gesture; the heavy tiers (success / warning)
 only ever accompany a visible overlay or sheet, never fire silently.
 
-### 10.3 Icon weight as a state signifier — NOT permitted — RECOMMENDATION (Ivan to confirm)
+### 10.3 Icon weight as a state signifier — NOT permitted — CONFIRMED (Ivan, 2026-09-09)
 
 Keep **one** Lucide stroke weight (`Theme.Icon.stroke = 1.75`) everywhere. No
 per-state weight shift and no thin↔filled swap on the same glyph. State is always

@@ -78,9 +78,9 @@ struct HomeCountryView: View {
             }
             .padding(.horizontal, 16)
             .frame(height: 58)
-            .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 15))
+            .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
             .overlay(
-                RoundedRectangle(cornerRadius: 15)
+                RoundedRectangle(cornerRadius: Theme.Radius.chip)
                     .strokeBorder(isSelected ? Theme.Palette.accent : Theme.Palette.border,
                                   lineWidth: isSelected ? 1.6 : 1)
             )

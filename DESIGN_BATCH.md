@@ -104,14 +104,14 @@ explicit nod (marked below); the rest write down what the build already does.*
   semantic hue: destructive labels + error/validation text, nothing else. Success and
   warning are structural, never colour (no green, no yellow). `danger` never carries
   meaning without an accompanying verb/icon/text — keeps the colourblind rule intact.
-- [x] **Haptics strategy.** → §10.2. **PROPOSED — confirm.** Four tiers on iOS 17
-  `.sensoryFeedback`: selection (tab switch, packing-item toggle, chips), light impact
-  (add item, save field), success (only with a reward overlay / purchase), warning
-  (Free-limit block, failed export). Never two haptics on one gesture.
-- [ ] **Icon weight as a state signifier.** → §10.3. **RECOMMENDATION: no.** One Lucide
-  stroke (1.75) everywhere; no thin↔filled swap on the same glyph. State stays
-  structural (tint / capsule / label / checkmark), as nav and Passport already do.
-  *Ivan to confirm this is the call.*
+- [x] **Haptics strategy.** → §10.2. **Confirmed by Ivan 2026-09-09.** Four tiers on
+  iOS 17 `.sensoryFeedback`: selection (tab switch, packing-item toggle, chips), light
+  impact (add item, save field), success (only with a reward overlay / purchase),
+  warning (Free-limit block, failed export). Never two haptics on one gesture.
+  Wiring happens in Batch D.
+- [x] **Icon weight as a state signifier.** → §10.3. **Confirmed by Ivan 2026-09-09: no.**
+  One Lucide stroke (1.75) everywhere; no thin↔filled swap on the same glyph. State
+  stays structural (tint / capsule / label / checkmark), as nav and Passport already do.
 - [x] **Icon-zone exception.** → §10.4. Reward overlay is its own zone; its badges are
   currently still Lucide at 40 pt over `RayBurst`. If bespoke stamp/suitcase artwork is
   ever swapped in *there only*, that's a sanctioned zone exception, documented now.
@@ -120,14 +120,44 @@ explicit nod (marked below); the rest write down what the build already does.*
   `PassportBook`/`WorldMap` objects, mono/duotone amber-on-ground. No mascot, no faces.
 
 ### Batch B — Screen & component-level passes
-- [ ] **Dark-mode elevation audit.** Confirm depth comes from a lighter card fill (not shadows), borders are dialed down rather than bright, and any chip/badge saturation is checked against the near-black base.
-- [ ] **Trip card hierarchy** (Suitcase list). Destination name large/bold/top, dates/countdown smaller below; consider an icon+line motif if a trip ever needs to show a route or multi-stop structure.
-- [ ] **Corner-radius consistency.** Set one radius value as a named constant for all small components (buttons, chips, inputs) rather than letting it vary screen to screen.
-- [ ] **Card-nesting check.** Audit the Suitcase list → trip card → item-card structure once built for any double-nested containers; prefer whitespace grouping over a second container.
-- [ ] **Progressive disclosure on forms.** Keep New Trip / New Suitcase forms to core fields (destination, dates, name) visible by default; collapse anything secondary behind an expandable section if the form grows.
-- [ ] **Template picker as a bottom sheet.** Use for choosing a saved packing template mid-flow, keeping the user in the suitcase-editing context.
-- [ ] **Overlay gradients.** Anywhere text sits over an image (Map tab, Passport stamps), use a gradient (optionally with progressive blur) rather than a flat scrim — matches the "dimmed, not opaque" approach already used for reward overlays.
-- [ ] **Redundant-element pass.** Once those screens exist, remove any leftover chevrons/arrows that duplicate a native swipe gesture already in place.
+
+*Worked 2026-09-09, branch `design-batch-b`. One real change (B3 corner-radius
+consolidation); the rest audited to "no change" or a deferred build-note. Build
+passes; TripDetail / Suitcase list / Passport screenshot-verified.*
+
+- [~] **Dark-mode elevation audit.** Spot-checked — nothing to fix now. Card fill is
+  already lighter than ground for elevation (`surface #141415` on `ground #0F0F10`);
+  `border #232323` is already dialed down (~`0x12` delta, not bright); the six
+  `.shadow` uses are all on *floating* content (nav pill, map pills, FAB, reward card,
+  export thumbnail), never on a flat adaptive card. Accent chips at 12% opacity read
+  fine on near-black. A full per-screen dark visual pass stays deferred — dark is the
+  v1.1 theme, refined per screen against the dark artboards.
+- [x] **Trip card hierarchy** (Suitcase list). No change — already correct: destination
+  `archivo(17, .bold)` at top, `dates · country` in `jetBrainsMono(12)`
+  `textSecondary` below, small mono countdown. Route / multi-stop motif is N/A (no
+  multi-city in the model).
+- [x] **Corner-radius consistency.** Done. `Theme.Radius` gains `micro` (5); §4 now
+  states "one token per tier, no 11–15 literals". 23 app-view files: every raw
+  `cornerRadius:` literal → a token. 11/12/13/14/15 → `chip` (16); dashed "add" rows +
+  info panels unified at `card` (20); list rows at `chip` (16). Left off the scale on
+  purpose: `RewardOverlayView` 26 (own zone, §10.4), `ProBenefitsView` slide 24,
+  `PackingListPDF` 4 (print doc).
+- [x] **Card-nesting check.** No change — Suitcase list → trip card → bag row is one
+  container each; icon tiles are fills, not nested bordered cards. No padding-on-padding.
+- [x] **Progressive disclosure on forms.** No change — `NewTripFlow`
+  (name / destination / dates / type) and `NewSuitcaseFlow` (name + chips) are already
+  core-fields-only. If either grows, collapse the secondary fields behind a disclosure.
+- [ ] **Template picker as a bottom sheet.** Deferred — no "start from template" flow
+  exists yet (templates are only *saved* today, Pro). Build-note: when that entry point
+  lands, it is a `.sheet` mid-flow, not a push.
+- [x] **Overlay gradients.** No change needed — `ShareCardView`, `PaywallView`, the
+  Suitcase hero and `AuthFormView` already use `LinearGradient`, not flat scrims. The
+  Passport header sits over a low-alpha map *watermark* (not a full-bleed image) and
+  stays legible without one.
+- [x] **Redundant-element pass.** No change — there are no `swipeActions` / `onDelete`
+  anywhere (deletion is explicit "−" buttons), so no chevron duplicates a swipe. Row
+  `chevron-right` is the standard disclosure indicator for tap-nav; `chevron-left` is
+  the custom back button (nav bars are hidden, so it's required).
 
 ### Batch C — Paywall, pricing & copy
 - [ ] **Reciprocity-based upsell copy.** At the point of friction (the 1-suitcase cap is the sharpest, per the Pro Features doc), show the specific unlock ("Unlimited suitcases, templates, sync") rather than a generic "Upgrade to Pro" banner.

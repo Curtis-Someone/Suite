@@ -160,7 +160,7 @@ struct SettingsView: View {
                     HStack(spacing: 12) {
                         LucideIcon(name: "gem", size: 20, color: Theme.Palette.onAccent)
                             .frame(width: 40, height: 40)
-                            .background(Theme.Palette.accent, in: RoundedRectangle(cornerRadius: 12))
+                            .background(Theme.Palette.accent, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Upgrade to Suite Pro")
                                 .font(.Suite.bodyStrong).foregroundStyle(Theme.Palette.textHeading)

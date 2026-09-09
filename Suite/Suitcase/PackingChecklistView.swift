@@ -248,7 +248,7 @@ struct PackingChecklistView: View {
         }
         .padding(.horizontal, 16)
         .background(isDone ? Theme.Palette.fill : Theme.Palette.surface,
-                   in: RoundedRectangle(cornerRadius: 16))
+                   in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
     }
 
     private func row(_ item: Item) -> some View {
@@ -262,13 +262,13 @@ struct PackingChecklistView: View {
                     RewardEngine.suitcasePacked(trip: trip, itemCount: suitcase.items.count)
                 }
             } label: {
-                RoundedRectangle(cornerRadius: 7)
+                RoundedRectangle(cornerRadius: Theme.Radius.control)
                     .fill(item.isPacked ? checkFill : .clear)
                     .overlay {
                         if item.isPacked {
                             SuiteIconView(icon: .check, size: 13, color: isDone ? Theme.Palette.fill : Theme.Palette.onAccent)
                         } else {
-                            RoundedRectangle(cornerRadius: 7).strokeBorder(Theme.Palette.track, lineWidth: 1.6)
+                            RoundedRectangle(cornerRadius: Theme.Radius.control).strokeBorder(Theme.Palette.track, lineWidth: 1.6)
                         }
                     }
                     .frame(width: 22, height: 22)
@@ -295,7 +295,7 @@ struct PackingChecklistView: View {
                     } label: {
                         SuiteIconView(icon: .plus, size: 12, color: Theme.Palette.textDisabled)
                             .frame(width: 26, height: 26)
-                            .background(Theme.Palette.ground, in: RoundedRectangle(cornerRadius: 8))
+                            .background(Theme.Palette.ground, in: RoundedRectangle(cornerRadius: Theme.Radius.control))
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
@@ -308,7 +308,7 @@ struct PackingChecklistView: View {
                     } label: {
                         SuiteIconView(icon: .close, size: 12, color: Theme.Palette.textDisabled)
                             .frame(width: 26, height: 26)
-                            .background(Theme.Palette.ground, in: RoundedRectangle(cornerRadius: 8))
+                            .background(Theme.Palette.ground, in: RoundedRectangle(cornerRadius: Theme.Radius.control))
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }

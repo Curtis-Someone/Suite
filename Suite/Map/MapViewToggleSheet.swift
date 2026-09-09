@@ -45,9 +45,9 @@ struct MapViewToggleSheet: View {
                     }
                     .padding(.horizontal, 16)
                     .frame(height: 54)
-                    .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 15))
+                    .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 15)
+                        RoundedRectangle(cornerRadius: Theme.Radius.chip)
                             .strokeBorder(option == mode ? Theme.Palette.accent : Theme.Palette.border,
                                           lineWidth: option == mode ? 1.6 : 1)
                     )

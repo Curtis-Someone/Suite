@@ -78,13 +78,19 @@ enum Theme {
     }
 
     // MARK: Corner radii
+    //
+    // One value per tier — pick the token, never a raw literal. Small components
+    // (list / result rows, small cards, single input fields, icon tiles, filter
+    // and accent chips) are **all** `chip` (16); do not reintroduce the 11–15
+    // spread that had crept in screen to screen (Design Batch B · B3).
 
     enum Radius {
-        static let control: CGFloat = 8    // swatches, tiny controls
-        static let chip: CGFloat    = 16
-        static let cardS: CGFloat   = 16
-        static let card: CGFloat    = 20
-        static let cardL: CGFloat   = 22
+        static let micro: CGFloat   = 5    // flag / ISO-code chips, tiny colour dots
+        static let control: CGFloat = 8    // swatches, checkboxes, tiny controls
+        static let chip: CGFloat    = 16   // rows, small cards, inputs, icon tiles, chips
+        static let cardS: CGFloat   = 16   // alias of `chip` — small card
+        static let card: CGFloat    = 20   // standard card, trip card, stat card
+        static let cardL: CGFloat   = 22   // large media card, share preview
         static let fieldGroup: CGFloat = 18 // multi-row input group
         static let sheet: CGFloat   = 20   // bottom-sheet top corners
         /// The device frame radius used in the design canvas — reference only,

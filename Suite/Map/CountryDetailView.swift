@@ -175,7 +175,7 @@ struct CountryDetailView: View {
             SuiteIconView(icon: icon, size: 15, color: on ? Theme.Palette.onAccent : Theme.Palette.textSecondary)
                 .frame(width: 38, height: 38)
                 .background(on ? Theme.Palette.accent : Theme.Palette.fill,
-                           in: RoundedRectangle(cornerRadius: 11))
+                           in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
         }
         .buttonStyle(.plain)
     }

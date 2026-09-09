@@ -164,7 +164,7 @@ struct SuitcaseTabView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 72)
             .background(
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: Theme.Radius.card)
                     .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6, 5]))
                     .foregroundStyle(Theme.Palette.border)
             )
@@ -176,7 +176,7 @@ struct SuitcaseTabView: View {
         HStack(spacing: 12) {
             LucideIcon(name: "sparkles", size: 20, color: Theme.Palette.accent)
                 .frame(width: 40, height: 40)
-                .background(Theme.Palette.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+                .background(Theme.Palette.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
             VStack(alignment: .leading, spacing: 3) {
                 Text("Pack a little each day")
                     .font(.archivo(14, .semibold))
@@ -189,7 +189,7 @@ struct SuitcaseTabView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Palette.surfaceSunken, in: RoundedRectangle(cornerRadius: 20))
+        .background(Theme.Palette.surfaceSunken, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
     }
 
     // MARK: Empty
@@ -279,6 +279,6 @@ struct SuitcaseTabView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 18)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card))
     }
 }

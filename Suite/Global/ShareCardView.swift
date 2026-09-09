@@ -74,7 +74,7 @@ struct ShareCardView: View {
             }
         }
         .frame(height: 470)
-        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.cardL))
         .overlay(alignment: .bottomLeading) {
             Wordmark(size: 15, wordColor: .white).padding(20)
         }

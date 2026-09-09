@@ -137,7 +137,7 @@ struct TripDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Theme.Palette.statTile, in: RoundedRectangle(cornerRadius: 16))
+        .background(Theme.Palette.statTile, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
     }
 
     // MARK: Suitcases
@@ -167,7 +167,7 @@ struct TripDetailView: View {
                        color: isDone ? Theme.Palette.textSecondary : Theme.Palette.onAccent)
                 .frame(width: 48, height: 48)
                 .background(isDone ? Theme.Palette.track : Theme.Palette.accent,
-                           in: RoundedRectangle(cornerRadius: 12))
+                           in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
             VStack(alignment: .leading, spacing: 7) {
                 Text(bag.name)
                     .font(.archivo(15, .bold))
@@ -184,8 +184,8 @@ struct TripDetailView: View {
             SuiteIconView(icon: .chevronRight, size: 16)
         }
         .padding(16)
-        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 18))
-        .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Theme.Palette.border))
+        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.chip).strokeBorder(Theme.Palette.border))
     }
 
     private var addBagRow: some View {
@@ -199,7 +199,7 @@ struct TripDetailView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 64)
             .background(
-                RoundedRectangle(cornerRadius: 18)
+                RoundedRectangle(cornerRadius: Theme.Radius.card)
                     .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6, 5]))
                     .foregroundStyle(Theme.Palette.border)
             )
@@ -223,7 +223,7 @@ struct TripDetailView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Palette.surfaceSunken, in: RoundedRectangle(cornerRadius: 18))
+        .background(Theme.Palette.surfaceSunken, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
     }
 
     // MARK: Actions

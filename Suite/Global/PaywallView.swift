@@ -163,9 +163,9 @@ struct PaywallView: View {
                 }
             }
             .padding(.horizontal, 18).padding(.vertical, 16)
-            .background(background(id), in: RoundedRectangle(cornerRadius: 20))
+            .background(background(id), in: RoundedRectangle(cornerRadius: Theme.Radius.card))
             .overlay(
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: Theme.Radius.card)
                     .strokeBorder(selected ? Theme.Palette.accent : Theme.Palette.border,
                                   lineWidth: selected ? 1.6 : 1))
             .overlay(alignment: .topTrailing) {

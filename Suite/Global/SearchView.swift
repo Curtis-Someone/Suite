@@ -112,7 +112,7 @@ struct SearchView: View {
                 leading: AnyView(
                     LucideIcon(name: trip.iconName, size: 18, color: Theme.Palette.onAccent)
                         .frame(width: 34, height: 24)
-                        .background(Theme.Palette.accent, in: RoundedRectangle(cornerRadius: 5))),
+                        .background(Theme.Palette.accent, in: RoundedRectangle(cornerRadius: Theme.Radius.micro))),
                 title: trip.name, subtitle: "Trip · \(trip.destinationCountry)")
         case .country(let country, let visited):
             resultRow(
@@ -135,7 +135,7 @@ struct SearchView: View {
             .foregroundStyle(on ? Theme.Palette.onAccent : Theme.Palette.textSecondary)
             .frame(width: 34, height: 24)
             .background(on ? Theme.Palette.accent : Theme.Palette.fillStrong,
-                       in: RoundedRectangle(cornerRadius: 5))
+                       in: RoundedRectangle(cornerRadius: Theme.Radius.micro))
     }
 
     private func resultRow(leading: AnyView, title: String, subtitle: String, subtitleAccent: Bool = false) -> some View {
@@ -153,6 +153,6 @@ struct SearchView: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 62)
-        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 16))
+        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
     }
 }
