@@ -4,7 +4,7 @@ import SwiftUI
 enum SuiteTab: CaseIterable {
     case map, suitcase, passport
 
-    /// Tab name — also the accessibility label and the revealed active label.
+    /// Tab name — also the accessibility label and the visible tab label.
     var title: String {
         switch self {
         case .map:      "Map"
@@ -25,15 +25,15 @@ enum SuiteTab: CaseIterable {
     }
 }
 
-/// Bottom navigation — a floating "bubble": a solid `surface` capsule inset
-/// from the screen edges, lifted off the content with a soft shadow. Solid,
-/// not the old `.ultraThinMaterial` glass.
+/// Bottom navigation — a floating "liquid glass" pill: a translucent
+/// `.ultraThinMaterial` capsule inset from the screen edges, with a soft
+/// specular border and a lifting shadow.
 ///
-/// Tapping a tab is *reactive* — the pressed tab springs down under the
-/// finger (`TabPressStyle`) and the switch fires a selection haptic. The
-/// active tab is also shown *structurally* — icon + label inside a neutral
-/// capsule highlight — so it doesn't rely on colour perception (same rule
-/// as visited/not-visited on the Passport).
+/// Every tab shows its glyph above a label. The current tab is tinted
+/// `navAmber` and sits on a faint neutral highlight — a structural cue, not
+/// colour alone (same rule as visited/not-visited on the Passport). Tapping
+/// a tab is *reactive* — the pressed tab springs down under the finger
+/// (`TabPressStyle`) and the switch fires a selection haptic.
 struct BottomNavBar: View {
     @Binding var selection: SuiteTab
 
@@ -60,10 +60,19 @@ struct BottomNavBar: View {
                 }
             }
         }
-        .padding(.horizontal, 6)
+        .padding(.horizontal, 8)
         .frame(height: Theme.Size.navPill)
-        .background(Theme.Palette.surface, in: .capsule)
-        .overlay(Capsule().strokeBorder(Theme.Palette.border, lineWidth: 0.5))
+        .background(.ultraThinMaterial, in: .capsule)
+        .overlay(
+            Capsule().strokeBorder(
+                LinearGradient(
+                    colors: [.white.opacity(0.55), .white.opacity(0.08)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                lineWidth: 1
+            )
+        )
         .shadow(color: Color.black.opacity(0.12), radius: 16, x: 0, y: 6)
         .padding(.horizontal, Theme.Space.xl)
         .padding(.bottom, Theme.Space.m)
@@ -72,7 +81,7 @@ struct BottomNavBar: View {
 }
 
 /// Touch feedback for the nav tabs — a springy scale + dim on press so the
-/// bubble reacts under the finger. Plain dim only when Reduce Motion is on.
+/// tab reacts under the finger. Plain dim only when Reduce Motion is on.
 private struct TabPressStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -86,8 +95,8 @@ private struct TabPressStyle: ButtonStyle {
     }
 }
 
-/// One tab. Inactive: icon only. Active: icon + label side by side, on a
-/// neutral capsule highlight, tinted with the text-safe amber.
+/// One tab — glyph above label, always visible. Active: tinted `navAmber` on
+/// a faint neutral highlight. Inactive: `navInk` at half strength.
 private struct TabItem: View {
     let tab: SuiteTab
     let isActive: Bool
@@ -95,39 +104,36 @@ private struct TabItem: View {
     let action: () -> Void
 
     private var tint: Color {
-        isActive ? Theme.Palette.navAmber : Theme.Palette.navInk.opacity(0.55)
+        isActive ? Theme.Palette.navAmber : Theme.Palette.navInk.opacity(0.5)
     }
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 6) {
+            VStack(spacing: 4) {
                 LucideIcon(name: tab.iconName, size: 22, color: tint)
                     .overlay(alignment: .topTrailing) {
                         if badged {
                             Circle()
                                 .fill(Theme.Palette.brandAmber)
                                 .frame(width: 7, height: 7)
-                                .offset(x: 3, y: -3)
+                                .offset(x: 4, y: -2)
                         }
                     }
 
-                if isActive {
-                    Text(tab.title)
-                        .font(.archivo(13, .semibold))
-                        .foregroundStyle(Theme.Palette.navAmber)
-                        .fixedSize()
-                        .transition(.opacity.combined(with: .scale(scale: 0.9)))
-                }
+                Text(tab.title)
+                    .font(.archivo(11, .semibold))
+                    .foregroundStyle(tint)
             }
-            .padding(.horizontal, isActive ? 16 : 12)
-            .frame(maxWidth: isActive ? .infinity : nil)
-            .frame(minWidth: 44, minHeight: 44)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: 44)
+            .padding(.vertical, 6)
             .background {
                 if isActive {
-                    Capsule().fill(Theme.Palette.navHighlight)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Theme.Palette.navHighlight)
                 }
             }
-            .contentShape(.capsule)
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(TabPressStyle())
         .accessibilityLabel(tab.title)

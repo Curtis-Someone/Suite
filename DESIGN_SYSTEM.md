@@ -145,7 +145,7 @@ Left deliberately off the scale: `RewardOverlayView` card `26` (its own zone, §
 | `cta` | 58 | Full-width primary CTA on a screen (radius = capsule, 29) |
 | `ctaCompact` | 54 | CTA inside a form / sheet (radius 27) |
 | `field` | 52 | Input row (single fields render 50–56; grouped rows 50–52) |
-| `navPill` | 56 | Floating nav pill height — capsule, **solid `surface` fill** (not `.ultraThinMaterial`), 0.5px `border` hairline, soft shadow; inset from the screen edges (`Space.xl` sides, `Space.m` above the bottom safe area) |
+| `navPill` | 64 | Floating nav pill height — capsule, translucent **`.ultraThinMaterial`** fill, specular gradient border, soft shadow; inset from the screen edges (`Space.xl` sides, `Space.m` above the bottom safe area). `navPillClearance` (100) is the matching bottom inset for content that scrolls behind it. |
 | `tabIcon` | 28 | Nav-bar icon box (pill glyphs render at 22) |
 | `progressBar` | 10 | Track height; radius 5; amber fill; also used per-row at 8px |
 
@@ -177,14 +177,15 @@ Circular gauge: SVG ring, `track` under-stroke + `accent` over-stroke, stroke wi
   (`Country.flag`, from Unicode regional-indicator symbols), OS-rendered at ~26pt,
   no fill or border. Selected/visited state reads from the row, not the chip.
   Missing-flag fallback: `track` fill + `textDisabled` glyph.
-- **Bottom nav** — floating pill: **solid `surface` capsule** (not `.ultraThinMaterial`
-  glass), 0.5px `border` hairline, soft shadow, inset from the screen edges. 3 tabs in
-  order **map · suitcase · passport**. Inactive: glyph only, `navInk` at 55%. Active:
-  glyph **+ label** side by side on a `navHighlight` capsule (neutral, colour-independent
-  — like visited/not-visited on the Passport), both tinted `navAmber`. Tapping a tab is
-  reactive — the pressed tab springs down (`TabPressStyle`), plus a selection haptic.
-  Selection change animates `.snappy`, suppressed under Reduce Motion. Optional
-  brand-amber badge dot, top-right of a glyph.
+- **Bottom nav** — floating "liquid glass" pill: translucent **`.ultraThinMaterial`
+  capsule**, specular gradient border, soft shadow, inset from the screen edges; a pure
+  overlay (reserves no layout — tab content runs full-bleed behind it, cleared by
+  `navPillClearance`). 3 tabs in order **map · suitcase · passport**, each **glyph above a
+  label**, always shown. Active: `navAmber` tint on a faint `navHighlight` rounded
+  highlight (neutral, colour-independent — like visited/not-visited on the Passport).
+  Inactive: `navInk` at 50%. Tapping a tab is reactive — the pressed tab springs down
+  (`TabPressStyle`), plus a selection haptic. Selection change animates `.snappy`,
+  suppressed under Reduce Motion. Optional brand-amber badge dot, top-right of a glyph.
 - **Selected checkmark** — `accent` filled circle, `onAccent` tick.
 - **Toggle switch** — 50×30 capsule; on = `accent` track + white knob; off = `track` +
   `textTertiary` knob.
@@ -201,8 +202,8 @@ closer to the canvas `sw`). Accessed via `SuiteIcon` / `SuiteIconView`, which ti
 The bottom-nav tabs mix sources: **`map`** is the Lucide glyph; **`suitcase`** and
 **`passport`** are custom line-art PNGs in `Assets.xcassets/Nav/` (`@1x/2x/3x`, drawn to
 match the Lucide 1.75 stroke). All three render template-mode and are tinted in code
-(`BottomNavBar.swift`). The active state is structural (label reveal + neutral capsule),
-so the old bespoke filled-amber glyphs are retired.
+(`BottomNavBar.swift`). The active state is structural (`navAmber` tint + a faint neutral
+highlight; labels always shown), so the old bespoke filled-amber glyphs are retired.
 
 Full-colour category / flag icons on Map + suitcase-builder screens are a separate,
 deliberate multi-colour exception (§1). The reward overlay is its own glyph zone —

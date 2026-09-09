@@ -120,11 +120,12 @@ enum Theme {
         /// Compact CTA (inside sheets / forms).
         static let ctaCompact: CGFloat = 54
         static let field: CGFloat      = 52
-        /// Bottom nav — height of the tab row (excludes the home-indicator inset).
-        static let navPill: CGFloat    = 56
+        /// Bottom nav — height of the tab row (glyph + label; excludes the
+        /// home-indicator inset).
+        static let navPill: CGFloat    = 64
         /// Bottom inset that keeps content / floating controls clear of the
-        /// nav pill, which is now a pure overlay (pill + its inset + a gap).
-        static let navPillClearance: CGFloat = 92
+        /// nav pill, which is a pure overlay (pill + its inset + a gap).
+        static let navPillClearance: CGFloat = 100
         static let tabIcon: CGFloat    = 28
         /// Progress-bar thickness.
         static let progressBar: CGFloat = 10
