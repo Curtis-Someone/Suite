@@ -17,6 +17,8 @@ struct TripDetailView: View {
 
     @State private var showingBuilder = false
     @State private var upsell: UpsellMoment?
+    @State private var confirmDeleteTrip = false
+    @State private var suitcaseToDelete: Suitcase?
 
     private var isDone: Bool { trip.isArchived }
 
@@ -49,6 +51,21 @@ struct TripDetailView: View {
             NewSuitcaseFlow(trip: trip) { _ in }
         }
         .sheet(item: $upsell) { UpsellSheet(moment: $0) }
+        .alert("Delete this trip?", isPresented: $confirmDeleteTrip) {
+            Button("Delete", role: .destructive) { deleteTrip() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This deletes “\(trip.name)” and its suitcases. This can't be undone.")
+        }
+        .alert("Delete this suitcase?",
+               isPresented: Binding(get: { suitcaseToDelete != nil },
+                                    set: { if !$0 { suitcaseToDelete = nil } }),
+               presenting: suitcaseToDelete) { bag in
+            Button("Delete", role: .destructive) { deleteSuitcase(bag) }
+            Button("Cancel", role: .cancel) {}
+        } message: { bag in
+            Text("This deletes “\(bag.name)” and everything packed in it. This can't be undone.")
+        }
     }
 
     // MARK: Header
@@ -63,6 +80,11 @@ struct TripDetailView: View {
                 }
                 .accessibilityLabel("Back")
                 Spacer()
+                Button { confirmDeleteTrip = true } label: {
+                    SuiteIconView(icon: .trash, size: 19, color: Theme.Palette.danger)
+                        .frame(width: 40, height: 40)
+                }
+                .accessibilityLabel("Delete trip")
                 Menu {
                     if isDone {
                         Button("Reopen trip") { reopen() }
@@ -153,6 +175,11 @@ struct TripDetailView: View {
                 ForEach(suitcases) { bag in
                     NavigationLink(value: bag) { bagRow(bag) }
                         .buttonStyle(.suitePress)
+                        .contextMenu {
+                            Button(role: .destructive) { suitcaseToDelete = bag } label: {
+                                Label("Delete suitcase", systemImage: "trash")
+                            }
+                        }
                 }
                 if !isDone { addBagRow }
             }
@@ -237,6 +264,17 @@ struct TripDetailView: View {
 
     private func reopen() {
         trip.isArchived = false
+        try? context.save()
+    }
+
+    private func deleteTrip() {
+        dismiss()
+        context.delete(trip)
+        try? context.save()
+    }
+
+    private func deleteSuitcase(_ bag: Suitcase) {
+        context.delete(bag)
         try? context.save()
     }
 

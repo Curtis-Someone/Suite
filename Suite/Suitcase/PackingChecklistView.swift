@@ -17,6 +17,7 @@ struct PackingChecklistView: View {
     @State private var upsell: UpsellMoment?
     @State private var templateSaved = false
     @State private var showExport = false
+    @State private var confirmDelete = false
 
     /// Safe to force-unwrap: `body` renders the error state when the inverse is
     /// missing, and every suitcase we push here belongs to a trip.
@@ -85,6 +86,18 @@ struct PackingChecklistView: View {
         } message: {
             Text("Start a new suitcase from “\(trip.name)” any time.")
         }
+        .alert("Delete this suitcase?", isPresented: $confirmDelete) {
+            Button("Delete", role: .destructive) { deleteSuitcase() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This deletes “\(suitcase.name)” and everything packed in it. This can't be undone.")
+        }
+    }
+
+    private func deleteSuitcase() {
+        dismiss()
+        context.delete(suitcase)
+        try? context.save()
     }
 
     private func saveTemplateTapped() {
@@ -123,6 +136,11 @@ struct PackingChecklistView: View {
                 }
                 .accessibilityLabel("Back")
                 Spacer()
+                Button { confirmDelete = true } label: {
+                    SuiteIconView(icon: .trash, size: 19, color: Theme.Palette.danger)
+                        .frame(width: 40, height: 40)
+                }
+                .accessibilityLabel("Delete suitcase")
                 Menu {
                     Button("Save as template") { saveTemplateTapped() }
                     Button("Export as PDF") { exportTapped() }
