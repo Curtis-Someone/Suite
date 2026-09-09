@@ -6,3 +6,6 @@ DerivedData/
 
 # local xcodebuild output
 build/
+
+# goldie App Store assets (regenerated)
+goldie/out/
