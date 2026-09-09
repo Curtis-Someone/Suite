@@ -11,6 +11,8 @@ struct CircularGauge: View {
     /// Defaults to the rounded percentage.
     var label: String? = nil
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var clamped: Double { max(0, min(1, value)) }
 
     var body: some View {
@@ -23,6 +25,7 @@ struct CircularGauge: View {
                         style: StrokeStyle(lineWidth: ringWidth,
                                            lineCap: clamped >= 1 ? .butt : .round))
                 .rotationEffect(.degrees(-90))
+                .animation(Theme.Motion.settle.gated(reduceMotion), value: clamped)
 
             Text(label ?? "\(Int((clamped * 100).rounded()))%")
                 .font(.archivo(size * 0.22, .bold))

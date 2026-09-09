@@ -8,6 +8,8 @@ struct SuiteProgressBar: View {
     var value: Double
     var height: CGFloat = Theme.Size.progressBar
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
@@ -15,6 +17,9 @@ struct SuiteProgressBar: View {
                 Capsule()
                     .fill(Theme.Palette.accent)
                     .frame(width: max(0, min(1, value)) * geo.size.width)
+                    // Glide to the new length when items get checked, rather
+                    // than jumping. Instant under Reduce Motion.
+                    .animation(Theme.Motion.settle.gated(reduceMotion), value: value)
             }
         }
         .frame(height: height)
