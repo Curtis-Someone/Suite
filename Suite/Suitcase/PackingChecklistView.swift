@@ -87,6 +87,7 @@ struct PackingChecklistView: View {
         .background(Theme.Palette.ground.ignoresSafeArea())
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        .keepsSwipeBack()
         // One haptic per change in packed count — a single tap or a whole
         // "Select all" batch each fire once, not once per item.
         .sensoryFeedback(trigger: packedCount) { old, new in

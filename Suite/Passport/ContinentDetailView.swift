@@ -45,6 +45,7 @@ struct ContinentDetailView: View {
         .background(Theme.Palette.ground.ignoresSafeArea())
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        .keepsSwipeBack()
     }
 
     private var header: some View {

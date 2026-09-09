@@ -48,6 +48,7 @@ struct TripDetailView: View {
         .background(Theme.Palette.ground.ignoresSafeArea())
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        .keepsSwipeBack()
         .fullScreenCover(isPresented: $showingBuilder) {
             NewSuitcaseFlow(trip: trip) { _ in }
         }
