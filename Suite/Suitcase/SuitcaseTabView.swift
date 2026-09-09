@@ -125,6 +125,8 @@ struct SuitcaseTabView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     if isSparse {
                         heroCard.padding(.bottom, 4)
+                    } else if let next = upcoming.first {
+                        nextTripHero(next).padding(.bottom, 4)
                     }
                     if !upcoming.isEmpty {
                         KickerLabel("Upcoming")
@@ -280,5 +282,89 @@ struct SuitcaseTabView: View {
             .padding(.bottom, 18)
         }
         .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card))
+    }
+
+    /// Slimmer sibling of `heroCard` for the populated list, where the full hero
+    /// has scrolled out of the layout. Same amber + luminosity-photo treatment,
+    /// but focused on the soonest trip: name, countdown, dates · country, and a
+    /// packing-progress bar. Taps through to that trip.
+    private func nextTripHero(_ trip: Trip) -> some View {
+        NavigationLink(value: trip) {
+            ZStack {
+                Theme.Palette.accent
+                Image("SuitcaseClosed")
+                    .resizable()
+                    .scaledToFill()
+                    .contrast(1.05)
+                    .blendMode(.luminosity)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 118)
+            .clipped()
+            .compositingGroup()
+            .overlay(
+                LinearGradient(colors: [.clear, .black.opacity(0.85)],
+                               startPoint: .top, endPoint: .bottom)
+            )
+            .overlay(alignment: .bottomLeading) {
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack(spacing: 6) {
+                        Text("Next trip")
+                            .foregroundStyle(Theme.Palette.accent)
+                        Text("· \(nextTripCountdown(trip))")
+                            .foregroundStyle(.white.opacity(0.85))
+                    }
+                    .font(.jetBrainsMono(10)).tracking(1.4).textCase(.uppercase)
+
+                    Text(trip.name)
+                        .font(.archivo(19, .bold)).tracking(19 * -0.02)
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+
+                    HStack(spacing: 8) {
+                        Text("\(PackingChecklistView.dateRange(trip)) · \(trip.destinationCountry)")
+                            .foregroundStyle(.white.opacity(0.8))
+                        Spacer(minLength: 8)
+                        Text(nextTripProgressLabel(trip))
+                            .foregroundStyle(.white)
+                    }
+                    .font(.jetBrainsMono(11, .medium))
+                    .lineLimit(1)
+
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(.white.opacity(0.25))
+                            Capsule().fill(.white)
+                                .frame(width: max(0, min(1, nextTripProgress(trip))) * geo.size.width)
+                        }
+                    }
+                    .frame(height: 4)
+                    .padding(.top, 2)
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+        }
+        .buttonStyle(.suitePress)
+    }
+
+    private func nextTripProgress(_ trip: Trip) -> Double {
+        let bags = trip.suitcases
+        guard !bags.isEmpty else { return 0 }
+        return bags.map(\.progress).reduce(0, +) / Double(bags.count)
+    }
+
+    private func nextTripProgressLabel(_ trip: Trip) -> String {
+        guard !trip.suitcases.isEmpty else { return "no bags yet" }
+        return "\(Int((nextTripProgress(trip) * 100).rounded()))% packed"
+    }
+
+    private func nextTripCountdown(_ trip: Trip) -> String {
+        let days = Calendar.current.dateComponents([.day], from: .now, to: trip.startDate).day ?? 0
+        if days > 1 { return "in \(days)d" }
+        if days == 1 { return "tomorrow" }
+        if days == 0 { return "today" }
+        return "under way"
     }
 }
