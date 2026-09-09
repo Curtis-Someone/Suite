@@ -158,7 +158,7 @@ struct PassportTabView: View {
             VStack(alignment: .leading, spacing: 12) {
                 LucideIcon(name: "globe", size: 24, color: Theme.Palette.accent)
                     .frame(width: 44, height: 44)
-                    .background(Theme.Palette.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 13))
+                    .background(Theme.Palette.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
                 Text(stats.countryCount == 1 ? "One stamp so far" : "Your passport is empty")
                     .font(.Suite.titleS).tracking(22 * -0.02)
                     .foregroundStyle(Theme.Palette.textPrimary)

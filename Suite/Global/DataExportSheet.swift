@@ -60,7 +60,7 @@ struct DataExportSheet: View {
         HStack(spacing: 14) {
             LucideIcon(name: trip.iconName, size: 18, color: Theme.Palette.onAccent)
                 .frame(width: 34, height: 24)
-                .background(Theme.Palette.accent, in: RoundedRectangle(cornerRadius: 5))
+                .background(Theme.Palette.accent, in: RoundedRectangle(cornerRadius: Theme.Radius.micro))
             VStack(alignment: .leading, spacing: 3) {
                 Text(trip.name).font(.archivo(15, .semibold)).foregroundStyle(Theme.Palette.textPrimary)
                 Text("\(PackingChecklistView.dateRange(trip)) · \(trip.destinationCountry)")
@@ -71,6 +71,6 @@ struct DataExportSheet: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 62)
-        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 16))
+        .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
     }
 }

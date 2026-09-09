@@ -21,7 +21,7 @@ struct TripCardView: View {
                        color: isPast ? Theme.Palette.textSecondary : Theme.Palette.onAccent)
                 .frame(width: 64, height: 64)
                 .background(isPast ? Theme.Palette.track : Theme.Palette.accent,
-                           in: RoundedRectangle(cornerRadius: 14))
+                           in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
@@ -56,7 +56,7 @@ struct TripCardView: View {
         }
         .padding(16)
         .background(isPast ? Theme.Palette.panel : Theme.Palette.surfaceSunken,
-                   in: RoundedRectangle(cornerRadius: 20))
+                   in: RoundedRectangle(cornerRadius: Theme.Radius.card))
     }
 
     private var statusLine: String {

@@ -47,8 +47,8 @@ struct CountryPicker: View {
                             }
                             .padding(.horizontal, 16)
                             .frame(height: 56)
-                            .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: 15))
-                            .overlay(RoundedRectangle(cornerRadius: 15).strokeBorder(Theme.Palette.border))
+                            .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
+                            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.chip).strokeBorder(Theme.Palette.border))
                         }
                         .buttonStyle(.plain)
                     }

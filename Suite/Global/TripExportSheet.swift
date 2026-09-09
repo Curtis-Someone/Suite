@@ -47,8 +47,8 @@ struct TripExportSheet: View {
                         preview
                             .resizable()
                             .aspectRatio(595.0 / 842.0, contentMode: .fit)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.Palette.border))
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.chip))
+                            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.chip).strokeBorder(Theme.Palette.border))
                             .shadow(color: .black.opacity(0.08), radius: 12, y: 6)
                     } else if failed {
                         Text("Couldn't build the PDF.")

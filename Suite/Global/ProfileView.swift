@@ -66,7 +66,7 @@ struct ProfileView: View {
                             StatColumn(value: "\(Int((stats.worldPercent * 100).rounded()))%", caption: "of world", valueSize: 26, alignment: .center),
                         ])
                         .padding(20)
-                        .background(Theme.Palette.surfaceSunken, in: RoundedRectangle(cornerRadius: 20))
+                        .background(Theme.Palette.surfaceSunken, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
 
                         SuiteCard(padding: 4) {
                             VStack(spacing: 0) {

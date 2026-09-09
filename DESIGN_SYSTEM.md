@@ -62,6 +62,9 @@ Single-accent rule holds. **One deliberate exception** (from `CLAUDE.md` + compe
 full-colour category / flag icons on the Map and suitcase-builder screens carry identity
 information and stay multi-colour. Every other icon is monochrome at one stroke weight.
 
+`danger` is the *only* semantic hue — success and warning are never colour. See
+**§11.1** for the full rule (what it may / may not mark, the colourblind pairing rule).
+
 ---
 
 ## 2. Typography
@@ -113,16 +116,25 @@ Screen chrome: content typically starts ~56–64 px from the top edge; primary C
 
 ## 4. Corner radii (`Theme.Radius`)
 
+**One value per tier — always the token, never a raw literal.** Small components
+(list / result rows, small cards, single input fields, icon tiles, filter & accent
+chips) are *all* `chip` (16). The 11–15 spread that had crept in screen to screen was
+consolidated in Design Batch B (§B3) — every app view now references a token.
+
 | Token | px | Applies to |
 |---|---|---|
-| `control` | 8 | Colour swatches, tiny controls |
-| `chip` / `cardS` | 16 | Filter chips, small cards, search-result rows |
-| `card` | 20 | Standard card (stat card, settings group) |
+| `micro` | 5 | Flag / ISO-code chips, tiny colour dots |
+| `control` | 8 | Colour swatches, checkboxes, tiny controls |
+| `chip` / `cardS` | 16 | Filter & accent chips, small cards, list / result rows, icon tiles, single input fields |
+| `card` | 20 | Standard card (trip card, stat card, settings group), dashed "add" rows, info panels |
 | `cardL` | 22 | Large media card, share preview |
-| `fieldGroup` | 18 | Multi-row input group |
+| `fieldGroup` | 18 | Multi-row input group (no current users — kept for when a grouped form returns) |
 | `sheet` | 20 | Bottom-sheet top corners |
 | pill | capsule | CTAs, single input fields, toggles, filter chips, nav dots |
 | `deviceFrame` | 46 | **Canvas only** — never on a real view |
+
+Left deliberately off the scale: `RewardOverlayView` card `26` (its own zone, §11.4),
+`ProBenefitsView` slide `24`, `PackingListPDF` checkbox `4` (print document, not a view).
 
 ---
 
@@ -193,7 +205,9 @@ match the Lucide 1.75 stroke). All three render template-mode and are tinted in 
 so the old bespoke filled-amber glyphs are retired.
 
 Full-colour category / flag icons on Map + suitcase-builder screens are a separate,
-deliberate multi-colour exception (§1).
+deliberate multi-colour exception (§1). The reward overlay is its own glyph zone —
+see **§11.4**. Icon *weight* is **not** a state signifier — one stroke (1.75)
+everywhere, state carried structurally (**§11.3**).
 
 Sizes: `24` standard · `28` nav · `18` inline with text · `16` trailing chevron.
 
@@ -270,3 +284,80 @@ Batch actions fire one haptic for the whole batch, not one per row.
 **Applied so far:** bottom nav (tab spring + selection haptic), `SuiteSwitch`,
 `SuiteProgressBar` / `CircularGauge` (glide on value change), and the S3 packing
 checklist (checkbox tick, section expand/collapse, "Select all" cascade, row add/delete).
+
+---
+
+## 11. Interaction & semantic-signal rules (Design Batch A)
+
+Resolutions for the five decisions in `DESIGN_BATCH.md` → Batch A. Grounded in
+`CLAUDE.md` (single amber accent, colourblind-safe) and the patterns already shipped
+in `Theme.swift` / `BottomNavBar.swift` / `RewardOverlayView.swift`. Items marked
+**CONFIRMED** are decisions Ivan has signed off; **RESOLVED** ones only write down what
+the build already does.
+
+### 11.1 Semantic colour — `danger` is the only hue; success/warning are structural — RESOLVED
+
+- **`Theme.Palette.danger`** (`#D96A4A` light / `#E07C5C` dark) is the *single* semantic
+  colour. It is a warm, desaturated terracotta-red tuned to sit beside amber — not a
+  system red. Reserved for exactly two jobs:
+  1. **Destructive action labels** — "Delete account", "Log out", "Remove", un-visit /
+     un-stamp confirmations.
+  2. **Error / validation text** — form errors, failed export, failed sync, the
+     `DataCheckView` fail state.
+  Never on an icon that only *categorises*, never decoratively, never as a fill.
+- **Success is not a colour.** Completion reads through the amber accent + structure:
+  the `accent` filled checkmark circle (§6), a full progress bar, the reward overlay.
+  No green enters the palette.
+- **Warning is not a colour.** A caution state (stale weather, past-dated trip) is
+  carried by an icon + `textSecondary` copy, or by `danger` if it is genuinely
+  blocking. No yellow — it would collide with amber.
+- **Colourblind rule (mandatory).** `danger` may never be the *only* signal. It always
+  pairs with an explicit verb ("Delete"), an icon, or inline error text. Any new state
+  conveyed by colour alone is a bug.
+
+### 11.2 Haptics — four tiers, one per gesture — CONFIRMED (Ivan, 2026-09-09)
+
+iOS 17 `.sensoryFeedback(_:trigger:)`, declared inline at each trigger (mirrors
+`BottomNavBar`'s `.sensoryFeedback(.selection, trigger: selection)` — no shared helper).
+The OS already honours the user's system haptics setting; no manual gate needed.
+
+| Tier | API | Weight | When |
+|---|---|---|---|
+| **Selection** | `.sensoryFeedback(.selection, …)` | light, frequent | Switching tab, toggling a packing item, flipping a segmented control, selecting a chip / filter, picking a row in a list |
+| **Light impact** | `.sensoryFeedback(.impact(weight: .light), …)` | light, committing | Adding an item, marking one city visited, saving a single field |
+| **Success** | `.sensoryFeedback(.success, …)` | heavy, rare | Always paired with a reward overlay: suitcase fully packed (R1), trip complete (R2), new country (R3), milestone (R4); successful purchase / restore |
+| **Warning** | `.sensoryFeedback(.warning, …)` | heavy, rare | Blocked by a Free limit (upsell sheet fires), failed export / sync, form validation error |
+
+Rules: never stack two haptics on one gesture; the heavy tiers (success / warning)
+only ever accompany a visible overlay or sheet, never fire silently.
+
+### 11.3 Icon weight as a state signifier — NOT permitted — CONFIRMED (Ivan, 2026-09-09)
+
+Keep **one** Lucide stroke weight (`Theme.Icon.stroke = 1.75`) everywhere. No
+per-state weight shift and no thin↔filled swap on the same glyph. State is always
+carried structurally — tint (`navAmber`), a neutral capsule (`navHighlight`), a
+revealed label, a checkmark, or position. This is already how the bottom nav and the
+Passport visited/not-visited state work; a weight swap would be less consistent at
+"screen 100" and weaker for colourblind users. The only fill in the system is the
+`accent` checkmark circle (§6), which is its own component, not a re-stroked icon.
+
+### 11.4 Reward-overlay glyph zone — RESOLVED
+
+The reward overlay (`RewardOverlayView`) is its **own visual zone**: an 88 pt badge
+over a custom `RayBurst` Canvas. Today its badge glyphs are still Lucide
+(`luggage` · `circle-check` · `map-pin` · `globe`) at 40 pt in `onAccent` — a size and
+treatment shift, *not* a style-family exception. Formal note: if a future spec swaps
+in bespoke stamp / suitcase / passport artwork **inside this overlay only**, that is a
+sanctioned zone exception (alongside the multi-colour map / builder icons in §1), not
+a violation of Lucide-everywhere. Persistent nav, list, and form icons stay strict
+Lucide 1.75.
+
+### 11.5 Empty-state illustration style — RESOLVED
+
+Current empty / no-result states (`SuitcaseTabView` empty, `ErrorStateView`,
+`SearchView` "nothing matches") are a Lucide glyph + copy, no illustration — keep that
+as the default. **If** a custom illustration is ever pursued, it must stay inside
+Suite's existing "premium travel object" language — derived from the `SuiteLogomark`
+/ `SuitcaseOpen` / `PassportBook` / `WorldMap` assets, rendered monochrome or
+duotone amber-on-`ground`. No mascot, no character, no faces — that would import a
+different identity wholesale.

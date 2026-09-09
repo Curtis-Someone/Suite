@@ -27,7 +27,7 @@ struct BuilderChipGrid: View {
                     HStack(spacing: 11) {
                         LucideIcon(name: chip.iconName, size: 17, color: .white)
                             .frame(width: 32, height: 32)
-                            .background(chip.tileColor, in: RoundedRectangle(cornerRadius: 9))
+                            .background(chip.tileColor, in: RoundedRectangle(cornerRadius: Theme.Radius.control))
                         Text(chip.title)
                             .font(.archivo(13, .semibold))
                             .foregroundStyle(Theme.Palette.textPrimary)
@@ -38,9 +38,9 @@ struct BuilderChipGrid: View {
                     .padding(.horizontal, 14)
                     .frame(height: 58)
                     .background(isOn ? Theme.Palette.accent.opacity(0.12) : Theme.Palette.surface,
-                               in: RoundedRectangle(cornerRadius: 15))
+                               in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 15)
+                        RoundedRectangle(cornerRadius: Theme.Radius.chip)
                             .strokeBorder(isOn ? Theme.Palette.accent : Theme.Palette.border,
                                           lineWidth: 1.4)
                     )
