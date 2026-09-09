@@ -17,6 +17,15 @@ struct SuitcaseTabView: View {
     private var upcoming: [Trip] { trips.filter { !$0.isArchived && $0.status != .past } }
     private var past: [Trip] { trips.visibleArchive(isPro: entitlements.isPro) }
 
+    /// True once a Free user has hit the active-trip cap — the add-card then
+    /// shows its locked (Pro) variant instead of the plain "New trip" prompt.
+    private var tripLimitReached: Bool {
+        if case .blocked = PackingGate.canCreateTrip(existingTrips: trips, isPro: entitlements.isPro) {
+            return true
+        }
+        return false
+    }
+
     /// Free tier caps active trips. Suitcases are added later, from the trip.
     private func newTripTapped() {
         switch PackingGate.canCreateTrip(existingTrips: trips, isPro: entitlements.isPro) {
@@ -133,7 +142,7 @@ struct SuitcaseTabView: View {
                         ForEach(upcoming) { trip in link(trip) }
                     }
                     if upcoming.count <= 2 {
-                        addCard
+                        if tripLimitReached { lockedAddCard } else { addCard }
                     }
                     if !past.isEmpty {
                         KickerLabel("Past").padding(.top, 6)
@@ -172,6 +181,45 @@ struct SuitcaseTabView: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    /// Same footprint as `addCard`, but once the Free trip cap is hit the "New
+    /// trip" affordance reads as Pro-locked: solid amber-tint fill, a padlock
+    /// where the "+" was, and a PRO tag. Still tappable — it opens the upsell.
+    private var lockedAddCard: some View {
+        Button { newTripTapped() } label: {
+            HStack(spacing: 12) {
+                LucideIcon(name: "lock", size: 18, color: Theme.Palette.onAccent)
+                    .frame(width: 36, height: 36)
+                    .background(Theme.Palette.accent, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Unlock more trips")
+                        .font(.archivo(15, .semibold))
+                        .foregroundStyle(Theme.Palette.textHeading)
+                    Text("Free keeps two trips going at once")
+                        .font(.archivo(12))
+                        .foregroundStyle(Theme.Palette.textSecondary)
+                }
+                Spacer(minLength: 8)
+                Text("PRO")
+                    .font(.jetBrainsMono(11, .bold))
+                    .foregroundStyle(Theme.Palette.accent)
+            }
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity)
+            .frame(height: 72)
+            .background(
+                RoundedRectangle(cornerRadius: Theme.Radius.card)
+                    .fill(Theme.Palette.accent.opacity(0.12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Theme.Radius.card)
+                            .strokeBorder(Theme.Palette.accent.opacity(0.35))
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("New trip, Pro")
+        .accessibilityHint("The Free plan is limited to two active trips")
     }
 
     private var packingTip: some View {
