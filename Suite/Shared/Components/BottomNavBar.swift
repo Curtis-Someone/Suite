@@ -3,140 +3,135 @@ import SwiftUI
 /// The three tabs, always in this order.
 enum SuiteTab: CaseIterable {
     case map, suitcase, passport
+
+    /// Tab name — also the accessibility label and the revealed active label.
+    var title: String {
+        switch self {
+        case .map:      "Map"
+        case .suitcase: "Suitcase"
+        case .passport: "Passport"
+        }
+    }
+
+    /// Asset name, imported template-mode so the tint is applied in code.
+    /// `map` is the Lucide glyph; `suitcase` / `passport` are the custom
+    /// line-art tab glyphs in `Assets.xcassets/Nav/`.
+    var iconName: String {
+        switch self {
+        case .map:      "map"
+        case .suitcase: "suitcase"
+        case .passport: "passport"
+        }
+    }
 }
 
-/// Bottom navigation — exactly three icons, `map · suitcase · passport`.
-/// Active icon is filled amber; inactive is a `textTertiary` stroke.
+/// Bottom navigation — a floating "bubble": a solid `surface` capsule inset
+/// from the screen edges, lifted off the content with a soft shadow. Solid,
+/// not the old `.ultraThinMaterial` glass.
+///
+/// Tapping a tab is *reactive* — the pressed tab springs down under the
+/// finger (`TabPressStyle`) and the switch fires a selection haptic. The
+/// active tab is also shown *structurally* — icon + label inside a neutral
+/// capsule highlight — so it doesn't rely on colour perception (same rule
+/// as visited/not-visited on the Passport).
 struct BottomNavBar: View {
     @Binding var selection: SuiteTab
 
+    /// Tabs currently showing a "new update" dot (e.g. a fresh Passport stamp).
+    /// Boolean for now; widen to a count for the reminder centre later.
+    var badgedTabs: Set<SuiteTab> = []
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 4) {
             ForEach(SuiteTab.allCases, id: \.self) { tab in
-                Button {
-                    selection = tab
-                } label: {
-                    TabGlyph(tab: tab, isActive: tab == selection)
-                        .frame(width: Theme.Size.tabIcon, height: Theme.Size.tabIcon)
-                        .frame(maxWidth: .infinity)
+                TabItem(
+                    tab: tab,
+                    isActive: tab == selection,
+                    badged: badgedTabs.contains(tab)
+                ) {
+                    guard tab != selection else { return }
+                    if reduceMotion {
+                        selection = tab
+                    } else {
+                        withAnimation(.snappy(duration: 0.28)) { selection = tab }
+                    }
                 }
-                .buttonStyle(.plain)
             }
         }
-        .padding(.top, 16)
-        .padding(.horizontal, 28)
-        .frame(height: Theme.Size.navBar, alignment: .top)
-        .frame(maxWidth: .infinity)
-        .background(Theme.Palette.surface)
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(Theme.Palette.fillStrong)
-                .frame(height: 1)
-        }
+        .padding(.horizontal, 6)
+        .frame(height: Theme.Size.navPill)
+        .background(Theme.Palette.surface, in: .capsule)
+        .overlay(Capsule().strokeBorder(Theme.Palette.border, lineWidth: 0.5))
+        .shadow(color: Color.black.opacity(0.12), radius: 16, x: 0, y: 6)
+        .padding(.horizontal, Theme.Space.xl)
+        .padding(.bottom, Theme.Space.m)
+        .sensoryFeedback(.selection, trigger: selection)
     }
 }
 
-/// Tab icons, traced from the handoff (24 view-box).
-private struct TabGlyph: View {
-    var tab: SuiteTab
-    var isActive: Bool
+/// Touch feedback for the nav tabs — a springy scale + dim on press so the
+/// bubble reacts under the finger. Plain dim only when Reduce Motion is on.
+private struct TabPressStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var accent: Color { isActive ? Theme.Palette.accent : .clear }
-    private var line: Color { isActive ? Theme.Palette.onAccent : Theme.Palette.textTertiary }
-    private var lineWidth: CGFloat { isActive ? 1.4 : Theme.Icon.stroke }
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.86 : 1)
+            .opacity(configuration.isPressed ? 0.7 : 1)
+            .animation(reduceMotion ? .easeOut(duration: 0.12)
+                                    : .spring(response: 0.3, dampingFraction: 0.55),
+                       value: configuration.isPressed)
+    }
+}
+
+/// One tab. Inactive: icon only. Active: icon + label side by side, on a
+/// neutral capsule highlight, tinted with the text-safe amber.
+private struct TabItem: View {
+    let tab: SuiteTab
+    let isActive: Bool
+    let badged: Bool
+    let action: () -> Void
+
+    private var tint: Color {
+        isActive ? Theme.Palette.navAmber : Theme.Palette.navInk.opacity(0.55)
+    }
 
     var body: some View {
-        GeometryReader { geo in
-            let s = geo.size.width / 24
-            ZStack {
-                switch tab {
-                case .map:      mapShape(s)
-                case .suitcase: suitcaseShape(s)
-                case .passport: passportShape(s)
+        Button(action: action) {
+            HStack(spacing: 6) {
+                LucideIcon(name: tab.iconName, size: 22, color: tint)
+                    .overlay(alignment: .topTrailing) {
+                        if badged {
+                            Circle()
+                                .fill(Theme.Palette.brandAmber)
+                                .frame(width: 7, height: 7)
+                                .offset(x: 3, y: -3)
+                        }
+                    }
+
+                if isActive {
+                    Text(tab.title)
+                        .font(.archivo(13, .semibold))
+                        .foregroundStyle(Theme.Palette.navAmber)
+                        .fixedSize()
+                        .transition(.opacity.combined(with: .scale(scale: 0.9)))
                 }
             }
-        }
-    }
-
-    // Three overlapping panels.
-    private func mapShape(_ s: CGFloat) -> some View {
-        let panels = [
-            [CGPoint(x: 2, y: 6), CGPoint(x: 9, y: 3), CGPoint(x: 9, y: 18), CGPoint(x: 2, y: 21)],
-            [CGPoint(x: 9, y: 3), CGPoint(x: 15, y: 6), CGPoint(x: 15, y: 21), CGPoint(x: 9, y: 18)],
-            [CGPoint(x: 15, y: 6), CGPoint(x: 22, y: 3), CGPoint(x: 22, y: 18), CGPoint(x: 15, y: 21)],
-        ]
-        return ForEach(0..<3, id: \.self) { i in
-            polygon(panels[i], s)
-                .fill(isActive ? Theme.Palette.accent : .clear)
-                .overlay(
-                    polygon(panels[i], s)
-                        .stroke(isActive ? Theme.Palette.onAccent : Theme.Palette.textTertiary,
-                                style: StrokeStyle(lineWidth: (isActive ? 1.2 : Theme.Icon.stroke) * s,
-                                                   lineJoin: .round))
-                )
-        }
-    }
-
-    // Briefcase: handle + body + slats + feet.
-    private func suitcaseShape(_ s: CGFloat) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 3 * s)
-                .fill(accent)
-                .overlay(RoundedRectangle(cornerRadius: 3 * s).stroke(line, lineWidth: lineWidth * s))
-                .frame(width: 16 * s, height: 12.6 * s)
-                .position(x: 12 * s, y: 13.5 * s)
-
-            RoundedRectangle(cornerRadius: 1.6 * s)
-                .stroke(isActive ? Theme.Palette.accent : Theme.Palette.textTertiary, lineWidth: lineWidth * s)
-                .frame(width: 5 * s, height: 4.6 * s)
-                .position(x: 12 * s, y: 4.9 * s)
-
-            Path { p in
-                for x in [9.2, 12.0, 14.8] {
-                    p.move(to: CGPoint(x: x * s, y: 10.4 * s))
-                    p.addLine(to: CGPoint(x: x * s, y: 16.6 * s))
+            .padding(.horizontal, isActive ? 16 : 12)
+            .frame(maxWidth: isActive ? .infinity : nil)
+            .frame(minWidth: 44, minHeight: 44)
+            .background {
+                if isActive {
+                    Capsule().fill(Theme.Palette.navHighlight)
                 }
             }
-            .stroke(line, style: StrokeStyle(lineWidth: (isActive ? 1.4 : Theme.Icon.stroke) * s, lineCap: .round))
-
-            ForEach([8.0, 16.0], id: \.self) { x in
-                Circle()
-                    .fill(isActive ? Theme.Palette.accent : .clear)
-                    .overlay(Circle().stroke(isActive ? Theme.Palette.accent : Theme.Palette.textTertiary, lineWidth: lineWidth * s))
-                    .frame(width: 2.4 * s, height: 2.4 * s)
-                    .position(x: x * s, y: 21.2 * s)
-            }
+            .contentShape(.capsule)
         }
-    }
-
-    // Passport / ID: cover + portrait circle + line.
-    private func passportShape(_ s: CGFloat) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 2.4 * s)
-                .fill(accent)
-                .overlay(RoundedRectangle(cornerRadius: 2.4 * s).stroke(isActive ? Theme.Palette.accent : Theme.Palette.textTertiary, lineWidth: lineWidth * s))
-                .frame(width: 15 * s, height: 18 * s)
-                .position(x: 12 * s, y: 12 * s)
-
-            Circle()
-                .stroke(line, lineWidth: (isActive ? 1.6 : Theme.Icon.stroke) * s)
-                .frame(width: 6.8 * s, height: 6.8 * s)
-                .position(x: 12 * s, y: 10.6 * s)
-
-            Path { p in
-                p.move(to: CGPoint(x: 8.4 * s, y: 17.2 * s))
-                p.addLine(to: CGPoint(x: 15.6 * s, y: 17.2 * s))
-            }
-            .stroke(line, style: StrokeStyle(lineWidth: (isActive ? 1.6 : Theme.Icon.stroke) * s, lineCap: .round))
-        }
-    }
-
-    private func polygon(_ pts: [CGPoint], _ s: CGFloat) -> Path {
-        Path { p in
-            guard let first = pts.first else { return }
-            p.move(to: CGPoint(x: first.x * s, y: first.y * s))
-            for pt in pts.dropFirst() { p.addLine(to: CGPoint(x: pt.x * s, y: pt.y * s)) }
-            p.closeSubpath()
-        }
+        .buttonStyle(TabPressStyle())
+        .accessibilityLabel(tab.title)
+        .accessibilityAddTraits(isActive ? [.isButton, .isSelected] : .isButton)
+        .accessibilityHint(badged ? "There's a new update on this tab" : "")
     }
 }

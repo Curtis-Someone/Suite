@@ -1,25 +1,8 @@
-# macOS
+.claude/
 .DS_Store
-
-# Xcode
-xcuserdata/
 *.xcuserstate
+xcuserdata/
 DerivedData/
+
+# local xcodebuild output
 build/
-*.pbxuser
-*.mode1v3
-*.mode2v3
-*.perspectivev3
-
-# Swift Package Manager
-.build/
-.swiftpm/
-
-# CocoaPods / Carthage
-Pods/
-Carthage/Build/
-
-# Misc
-*.ipa
-*.dSYM
-*.dSYM.zip
