@@ -62,6 +62,9 @@ Single-accent rule holds. **One deliberate exception** (from `CLAUDE.md` + compe
 full-colour category / flag icons on the Map and suitcase-builder screens carry identity
 information and stay multi-colour. Every other icon is monochrome at one stroke weight.
 
+`danger` is the *only* semantic hue — success and warning are never colour. See
+**§10.1** for the full rule (what it may / may not mark, the colourblind pairing rule).
+
 ---
 
 ## 2. Typography
@@ -193,7 +196,9 @@ match the Lucide 1.75 stroke). All three render template-mode and are tinted in 
 so the old bespoke filled-amber glyphs are retired.
 
 Full-colour category / flag icons on Map + suitcase-builder screens are a separate,
-deliberate multi-colour exception (§1).
+deliberate multi-colour exception (§1). The reward overlay is its own glyph zone —
+see **§10.4**. Icon *weight* is **not** a state signifier — one stroke (1.75)
+everywhere, state carried structurally (**§10.3**).
 
 Sizes: `24` standard · `28` nav · `18` inline with text · `16` trailing chevron.
 
@@ -242,3 +247,80 @@ before building.)*
    (open/packed suitcase), `uploads/d5599fe2…png` (passport spread) exceed the design
    MCP's 256 KB read cap and could not be pulled in full. Raw look-alikes exist in
    `Diseño/Elements/`. Need full-res exports before the onboarding/tour screens (batch 4).
+
+---
+
+## 10. Interaction & semantic-signal rules (Design Batch A)
+
+Resolutions for the five decisions in `DESIGN_BATCH.md` → Batch A. Grounded in
+`CLAUDE.md` (single amber accent, colourblind-safe) and the patterns already shipped
+in `Theme.swift` / `BottomNavBar.swift` / `RewardOverlayView.swift`. Items marked
+**PROPOSED** / **RECOMMENDATION** introduce a new standard and want Ivan's nod before
+code leans on them; items marked **RESOLVED** only write down what the build already does.
+
+### 10.1 Semantic colour — `danger` is the only hue; success/warning are structural — RESOLVED
+
+- **`Theme.Palette.danger`** (`#D96A4A` light / `#E07C5C` dark) is the *single* semantic
+  colour. It is a warm, desaturated terracotta-red tuned to sit beside amber — not a
+  system red. Reserved for exactly two jobs:
+  1. **Destructive action labels** — "Delete account", "Log out", "Remove", un-visit /
+     un-stamp confirmations.
+  2. **Error / validation text** — form errors, failed export, failed sync, the
+     `DataCheckView` fail state.
+  Never on an icon that only *categorises*, never decoratively, never as a fill.
+- **Success is not a colour.** Completion reads through the amber accent + structure:
+  the `accent` filled checkmark circle (§6), a full progress bar, the reward overlay.
+  No green enters the palette.
+- **Warning is not a colour.** A caution state (stale weather, past-dated trip) is
+  carried by an icon + `textSecondary` copy, or by `danger` if it is genuinely
+  blocking. No yellow — it would collide with amber.
+- **Colourblind rule (mandatory).** `danger` may never be the *only* signal. It always
+  pairs with an explicit verb ("Delete"), an icon, or inline error text. Any new state
+  conveyed by colour alone is a bug.
+
+### 10.2 Haptics — four tiers, one per gesture — PROPOSED
+
+iOS 17 `.sensoryFeedback(_:trigger:)`, declared inline at each trigger (mirrors
+`BottomNavBar`'s `.sensoryFeedback(.selection, trigger: selection)` — no shared helper).
+The OS already honours the user's system haptics setting; no manual gate needed.
+
+| Tier | API | Weight | When |
+|---|---|---|---|
+| **Selection** | `.sensoryFeedback(.selection, …)` | light, frequent | Switching tab, toggling a packing item, flipping a segmented control, selecting a chip / filter, picking a row in a list |
+| **Light impact** | `.sensoryFeedback(.impact(weight: .light), …)` | light, committing | Adding an item, marking one city visited, saving a single field |
+| **Success** | `.sensoryFeedback(.success, …)` | heavy, rare | Always paired with a reward overlay: suitcase fully packed (R1), trip complete (R2), new country (R3), milestone (R4); successful purchase / restore |
+| **Warning** | `.sensoryFeedback(.warning, …)` | heavy, rare | Blocked by a Free limit (upsell sheet fires), failed export / sync, form validation error |
+
+Rules: never stack two haptics on one gesture; the heavy tiers (success / warning)
+only ever accompany a visible overlay or sheet, never fire silently.
+
+### 10.3 Icon weight as a state signifier — NOT permitted — RECOMMENDATION (Ivan to confirm)
+
+Keep **one** Lucide stroke weight (`Theme.Icon.stroke = 1.75`) everywhere. No
+per-state weight shift and no thin↔filled swap on the same glyph. State is always
+carried structurally — tint (`navAmber`), a neutral capsule (`navHighlight`), a
+revealed label, a checkmark, or position. This is already how the bottom nav and the
+Passport visited/not-visited state work; a weight swap would be less consistent at
+"screen 100" and weaker for colourblind users. The only fill in the system is the
+`accent` checkmark circle (§6), which is its own component, not a re-stroked icon.
+
+### 10.4 Reward-overlay glyph zone — RESOLVED
+
+The reward overlay (`RewardOverlayView`) is its **own visual zone**: an 88 pt badge
+over a custom `RayBurst` Canvas. Today its badge glyphs are still Lucide
+(`luggage` · `circle-check` · `map-pin` · `globe`) at 40 pt in `onAccent` — a size and
+treatment shift, *not* a style-family exception. Formal note: if a future spec swaps
+in bespoke stamp / suitcase / passport artwork **inside this overlay only**, that is a
+sanctioned zone exception (alongside the multi-colour map / builder icons in §1), not
+a violation of Lucide-everywhere. Persistent nav, list, and form icons stay strict
+Lucide 1.75.
+
+### 10.5 Empty-state illustration style — RESOLVED
+
+Current empty / no-result states (`SuitcaseTabView` empty, `ErrorStateView`,
+`SearchView` "nothing matches") are a Lucide glyph + copy, no illustration — keep that
+as the default. **If** a custom illustration is ever pursued, it must stay inside
+Suite's existing "premium travel object" language — derived from the `SuiteLogomark`
+/ `SuitcaseOpen` / `PassportBook` / `WorldMap` assets, rendered monochrome or
+duotone amber-on-`ground`. No mascot, no character, no faces — that would import a
+different identity wholesale.
