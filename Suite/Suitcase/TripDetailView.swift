@@ -181,6 +181,9 @@ struct TripDetailView: View {
                     NavigationLink(value: bag) { bagRow(bag) }
                         .buttonStyle(.suitePress)
                         .contextMenu {
+                            Button { showingEdit = true } label: {
+                                Label("Edit trip details", systemImage: "pencil")
+                            }
                             Button(role: .destructive) { suitcaseToDelete = bag } label: {
                                 Label("Delete suitcase", systemImage: "trash")
                             }

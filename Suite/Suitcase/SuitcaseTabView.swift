@@ -14,6 +14,7 @@ struct SuitcaseTabView: View {
     @State private var path = NavigationPath()
     @State private var didApplyDevArgs = false
     @State private var tripToDelete: Trip?
+    @State private var tripToEdit: Trip?
 
     private var upcoming: [Trip] { trips.filter { !$0.isArchived && $0.status != .past } }
     private var past: [Trip] { trips.visibleArchive(isPro: entitlements.isPro) }
@@ -53,6 +54,7 @@ struct SuitcaseTabView: View {
         .fullScreenCover(isPresented: $showingBuilder) {
             NewTripFlow { newTrip in path.append(newTrip) }
         }
+        .fullScreenCover(item: $tripToEdit) { EditTripFlow(trip: $0) }
         .sheet(isPresented: $showingSearch) { SearchView() }
         .sheet(isPresented: $showingProfile) { ProfileView() }
         .sheet(item: $upsell) { UpsellSheet(moment: $0) }
@@ -164,6 +166,9 @@ struct SuitcaseTabView: View {
         NavigationLink(value: trip) { TripCardView(trip: trip) }
             .buttonStyle(.suitePress)
             .contextMenu {
+                Button { tripToEdit = trip } label: {
+                    Label("Edit trip details", systemImage: "pencil")
+                }
                 Button(role: .destructive) { tripToDelete = trip } label: {
                     Label("Delete trip", systemImage: "trash")
                 }
