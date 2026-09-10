@@ -7,14 +7,32 @@ struct SuitcaseTabView: View {
     @Environment(\.colorScheme) private var colorScheme
     private let entitlements = Entitlements.shared
     @Query(sort: \Trip.startDate) private var trips: [Trip]
+    @Query private var visits: [VisitedPlace]
+    @Query private var settingsList: [UserSettings]
     @State private var showingBuilder = false
     @State private var showingProfile = false
     @State private var showingSearch = false
+    @State private var showingAddFriends = false
     @State private var upsell: UpsellMoment?
     @State private var path = NavigationPath()
     @State private var didApplyDevArgs = false
     @State private var tripToDelete: Trip?
     @State private var tripToEdit: Trip?
+
+    private struct FriendsHub: Hashable {}
+
+    private var myName: String {
+        let n = settingsList.first?.displayName ?? ""
+        return n.isEmpty ? "You" : n
+    }
+    private var passportStats: PassportStats { PassportStats(visits: visits) }
+
+    private func friendsTapped() {
+        switch PackingGate.canUseFriends(isPro: entitlements.isPro) {
+        case .allowed:             path.append(FriendsHub())
+        case .blocked(let reason): upsell = reason
+        }
+    }
 
     private var upcoming: [Trip] { trips.filter { !$0.isArchived && $0.status != .past } }
     private var past: [Trip] { trips.visibleArchive(isPro: entitlements.isPro) }
@@ -36,11 +54,21 @@ struct SuitcaseTabView: View {
             }
             .navigationDestination(for: Trip.self) { TripDetailView(trip: $0) }
             .navigationDestination(for: Suitcase.self) { PackingChecklistView(suitcase: $0) }
+            .navigationDestination(for: Friend.self) { FriendProfileView(friend: $0) }
+            .navigationDestination(for: FriendsHub.self) { _ in
+                FriendsScreen(
+                    myName: myName,
+                    myCountryCount: passportStats.countryCount,
+                    myWorldPercent: passportStats.worldPercent,
+                    onOpenFriend: { path.append($0) },
+                    onAddFriend: { showingAddFriends = true })
+            }
         }
         .fullScreenCover(isPresented: $showingBuilder) {
             NewTripFlow { newTrip in path.append(newTrip) }
         }
         .fullScreenCover(item: $tripToEdit) { EditTripFlow(trip: $0) }
+        .fullScreenCover(isPresented: $showingAddFriends) { AddFriendsView() }
         .sheet(isPresented: $showingSearch) { SearchView() }
         .sheet(isPresented: $showingProfile) { ProfileView() }
         .sheet(item: $upsell) { UpsellSheet(moment: $0) }
@@ -96,6 +124,10 @@ struct SuitcaseTabView: View {
         HStack(spacing: 18) {
             Wordmark(size: 26)
             Spacer()
+            Button { friendsTapped() } label: {
+                SuiteIconView(icon: .users, size: 24, color: Theme.Palette.textBody)
+            }
+            .accessibilityLabel("Friends")
             Button { showingSearch = true } label: {
                 SuiteIconView(icon: .search, size: 24, color: Theme.Palette.textBody)
             }
