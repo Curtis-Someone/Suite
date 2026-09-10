@@ -54,6 +54,7 @@ enum SuiteIcon: String {
     case list
     case listPlus      = "list-plus"
     case user          = "circle-user"
+    case users
     case heart
     case flag
     case globe

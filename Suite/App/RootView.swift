@@ -46,6 +46,11 @@ struct RootView: View {
         case "reward5":      return AnyView(RewardDemo(.init(kind: .friendAdded, title: "You and Maria are now friends.", message: "2 trips in common.")))
         case "reward6":      return AnyView(RewardDemo(.init(kind: .firstTripTogether, title: "First trip with Maria complete.", message: "Lisbon, Portugal is stamped in both your passports.")))
         case "addFriends":   return AnyView(AddFriendsView())
+        case "friends":
+            return AnyView(NavigationStack {
+                FriendsScreen(myName: "You", myCountryCount: 12, myWorldPercent: 0.06,
+                              onOpenFriend: { _ in }, onAddFriend: {})
+            })
         case "friendProfile":
             return AnyView(FriendProfileView(friend: Friend(
                 displayName: "Maria Alvés", status: .accepted, sharesPassport: true,

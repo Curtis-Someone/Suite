@@ -22,6 +22,7 @@ struct PassportTabView: View {
     enum Mode: Hashable { case trips, passport }
     enum Scope: Hashable { case you, friends }
     private struct CountryList: Hashable {}
+    private struct FriendsHub: Hashable {}
 
     private var myName: String {
         let n = settingsList.first?.displayName ?? ""
@@ -69,6 +70,14 @@ struct PassportTabView: View {
             }
             .navigationDestination(for: Continent.self) { ContinentDetailView(continent: $0) }
             .navigationDestination(for: CountryList.self) { _ in CountryListView() }
+            .navigationDestination(for: FriendsHub.self) { _ in
+                FriendsScreen(
+                    myName: myName,
+                    myCountryCount: stats.countryCount,
+                    myWorldPercent: stats.worldPercent,
+                    onOpenFriend: { path.append($0) },
+                    onAddFriend: { showingAddFriends = true })
+            }
             .navigationDestination(for: Trip.self) { TripDetailView(trip: $0) }
             .navigationDestination(for: Suitcase.self) { PackingChecklistView(suitcase: $0) }
             .navigationDestination(for: Friend.self) { FriendProfileView(friend: $0) }
@@ -109,6 +118,19 @@ struct PassportTabView: View {
                     .font(.Suite.titleL).tracking(27 * -0.02)
                     .foregroundStyle(Theme.Palette.textPrimary)
                 Spacer()
+            }
+            .overlay(alignment: .leading) {
+                Button {
+                    switch PackingGate.canUseFriends(isPro: entitlements.isPro) {
+                    case .allowed:             path.append(FriendsHub())
+                    case .blocked(let reason): upsell = reason
+                    }
+                } label: {
+                    SuiteIconView(icon: .users, size: 20, color: Theme.Palette.textPrimary)
+                        .frame(width: 40, height: 40)
+                        .overlay(Circle().strokeBorder(Theme.Palette.border))
+                }
+                .accessibilityLabel("Friends")
             }
             .overlay(alignment: .trailing) {
                 Button { showingAdd = true } label: {
