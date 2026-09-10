@@ -42,6 +42,24 @@ struct WorldMapView: View {
     // Centroid label on a non-visited country (visited ones use dark-on-amber).
     private var labelInk: Color { isDark ? Color(hex: 0x8A857E) : Color(hex: 0x77736C) }
 
+    // On-map country names. Tuned so names only appear once you've zoomed well
+    // into a region — never on the world overview — and only on countries wide
+    // enough on screen to hold the whole name. The nearest few to the view
+    // centre win, so you get the country you're looking at plus its neighbours.
+    private enum CountryLabel {
+        /// Net zoom must clear this before any name is drawn at all.
+        static let minZoom: CGFloat = 5.5
+        static let size: CGFloat = 11
+        static let weight: Font.Weight = .semibold
+        /// Wide letter-spacing reads as cartographic rather than UI copy.
+        static let tracking: CGFloat = 1.4
+        /// Breathing room the name needs *inside* the country's on-screen width
+        /// before it's allowed to show.
+        static let fitInset: CGFloat = 18
+        /// Cap on names shown at once, closest to the view centre first.
+        static let maxCount = 5
+    }
+
     var body: some View {
         GeometryReader { geo in
             let t = transform(in: geo.size)
@@ -52,7 +70,10 @@ struct WorldMapView: View {
                 // stay hairline-thin at every zoom level.
                 let hair = 1 / screenScale
                 let viewRect = CGRect(origin: .zero, size: size).insetBy(dx: -2, dy: -2)
-                var labels: [(String, CGPoint, Bool)] = []
+                // netZoom == zoom * pinch (t.a is size.width * that).
+                let labelsOn = focus != nil || screenScale / size.width > CountryLabel.minZoom
+                let viewMid = CGPoint(x: size.width / 2, y: size.height / 2)
+                var labels: [(text: Text, at: CGPoint, onAmber: Bool, pull: CGFloat)] = []
 
                 // Draw in unit space: set the transform on the context once
                 // rather than rebuilding every country's Path each frame.
@@ -81,23 +102,32 @@ struct WorldMapView: View {
                         ctx.stroke(c.path, with: .color(border), lineWidth: 0.5 * hair)
                     }
 
-                    // Label at the main-landmass centroid, once it's big enough
-                    // on screen and on screen at all.
-                    if c.unitSize * screenScale > 58 {
+                    // Name at the main-landmass centroid — only when zoomed
+                    // deep in, only if the whole name fits inside the country
+                    // on screen, and only while its centroid is on screen.
+                    if labelsOn {
                         let at = c.center.applying(t)
-                        if at.x > -40, at.x < size.width + 40, at.y > 0, at.y < size.height {
-                            labels.append((c.mapLabel, at, isVisited))
+                        let onScreen = at.x > 0 && at.x < size.width
+                            && at.y > 0 && at.y < size.height
+                        let text = Text(c.mapLabel.uppercased())
+                            .font(.system(size: CountryLabel.size, weight: CountryLabel.weight))
+                            .tracking(CountryLabel.tracking)
+                        let nameWidth = ctx.resolve(text).measure(in: size).width
+                        if onScreen, nameWidth + CountryLabel.fitInset <= c.unitSize * screenScale {
+                            labels.append((text, at, isVisited,
+                                           hypot(at.x - viewMid.x, at.y - viewMid.y)))
                         }
                     }
                 }
 
                 ctx.transform = .identity   // labels are positioned in screen space
-                for (name, at, onAmber) in labels {
-                    ctx.draw(
-                        Text(name)
-                            .font(.system(size: 10.5, weight: .medium))
-                            .foregroundStyle(onAmber ? Color(hex: 0x1A130A) : labelInk),
-                        at: at)
+                // A soft halo in the ground colour keeps a name legible where it
+                // crosses a border or a busy coastline.
+                var labelCtx = ctx
+                labelCtx.addFilter(.shadow(color: ground.opacity(0.9), radius: 1.6, x: 0, y: 0))
+                for label in labels.sorted(by: { $0.pull < $1.pull }).prefix(CountryLabel.maxCount) {
+                    let ink = label.onAmber ? Color(hex: 0x1A130A) : labelInk
+                    labelCtx.draw(label.text.foregroundStyle(ink), at: label.at)
                 }
             }
             .contentShape(Rectangle())
