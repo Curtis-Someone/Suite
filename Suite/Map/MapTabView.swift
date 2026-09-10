@@ -102,13 +102,6 @@ struct MapTabView: View {
                         .shadow(color: .black.opacity(0.12), radius: 8, y: 3)
                     }
                     Spacer()
-                    Button { showingAdd = true } label: {
-                        SuiteIconView(icon: .plus, size: 24, color: Theme.Palette.onAccent)
-                            .frame(width: 56, height: 56)
-                            .background(Theme.Palette.accent, in: Circle())
-                            .shadow(color: .black.opacity(0.14), radius: 10, y: 4)
-                    }
-                    .accessibilityLabel("Add a place you've visited")
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, Theme.Size.navPillClearance)

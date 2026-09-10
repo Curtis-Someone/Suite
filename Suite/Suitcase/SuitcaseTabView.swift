@@ -29,24 +29,10 @@ struct SuitcaseTabView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            ZStack(alignment: .bottomTrailing) {
+            ZStack {
                 Theme.Palette.surface.ignoresSafeArea()
 
                 if trips.isEmpty { emptyState } else { list }
-
-                // Once the list has a few trips the dashed add-card scrolls away,
-                // so the FAB takes over.
-                if !trips.isEmpty && upcoming.count > 2 {
-                    Button { newTripTapped() } label: {
-                        SuiteIconView(icon: .plus, size: 24, color: Theme.Palette.onAccent)
-                            .frame(width: 56, height: 56)
-                            .background(Theme.Palette.accent, in: Circle())
-                            .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
-                    }
-                    .accessibilityLabel("New trip")
-                    .padding(.trailing, 24)
-                    .padding(.bottom, 20)
-                }
             }
             .navigationDestination(for: Trip.self) { TripDetailView(trip: $0) }
             .navigationDestination(for: Suitcase.self) { PackingChecklistView(suitcase: $0) }

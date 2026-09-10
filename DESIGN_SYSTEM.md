@@ -177,15 +177,20 @@ Circular gauge: SVG ring, `track` under-stroke + `accent` over-stroke, stroke wi
   (`Country.flag`, from Unicode regional-indicator symbols), OS-rendered at ~26pt,
   no fill or border. Selected/visited state reads from the row, not the chip.
   Missing-flag fallback: `track` fill + `textDisabled` glyph.
-- **Bottom nav** — floating "liquid glass" pill: translucent **`.ultraThinMaterial`
-  capsule**, specular gradient border, soft shadow, inset from the screen edges; a pure
-  overlay (reserves no layout — tab content runs full-bleed behind it, cleared by
-  `navPillClearance`). 3 tabs in order **map · suitcase · passport**, each **glyph above a
-  label**, always shown. Active: `navAmber` tint on a faint `navHighlight` rounded
-  highlight (neutral, colour-independent — like visited/not-visited on the Passport).
-  Inactive: `navInk` at 50%. Tapping a tab is reactive — the pressed tab springs down
-  (`TabPressStyle`), plus a selection haptic. Selection change animates `.snappy`,
-  suppressed under Reduce Motion. Optional brand-amber badge dot, top-right of a glyph.
+- **Bottom nav** — a two-piece floating "liquid glass" dock: a translucent
+  **`.ultraThinMaterial`** tab capsule on the left + a round quick-add button on its
+  right (both `navPill` tall, specular gradient edge, soft shadow), inset from the
+  screen edges; a pure overlay (reserves no layout — tab content runs full-bleed behind
+  it, cleared by `navPillClearance`). 3 tabs in order **map · suitcase · passport**,
+  each **glyph above a label**, always shown. Active: `navAmber` tint on a faint
+  `navHighlight` rounded highlight (neutral, colour-independent — like visited/not-visited
+  on the Passport). Inactive: `navInk` at 50%. The **"+" button** springs open a glass
+  menu — **New trip · New place · New friend** (each gated where the target is:
+  `canCreateTrip` / `canUseFriends`) — over a dim scrim, and the glyph rotates to a
+  close "×". These replace the per-tab bottom-right FABs. Tapping a tab or the "+" is
+  reactive — springs down (`TabPressStyle`), plus a selection / impact haptic. Selection
+  change animates `.snappy`, the menu `.spring`, both suppressed under Reduce Motion.
+  Optional brand-amber badge dot, top-right of a glyph.
 - **Selected checkmark** — `accent` filled circle, `onAccent` tick.
 - **Toggle switch** — 50×30 capsule; on = `accent` track + white knob; off = `track` +
   `textTertiary` knob.
