@@ -14,6 +14,14 @@ struct SearchView: View {
     }()
     @FocusState private var focused: Bool
 
+    /// Tapping a result opens its detail as a nested sheet — same pattern the Map
+    /// tab uses for country detail. Cities have no screen of their own, so a city
+    /// hit opens its country (with that country's city list).
+    @State private var selectedTrip: Trip?
+    @State private var selectedCountryISO: ISOWrap?
+
+    private struct ISOWrap: Identifiable { let id: String }
+
     private var visitedCountryCodes: Set<String> { Set(visits.map { $0.countryCode.uppercased() }) }
     private var visitedCityKeys: Set<String> {
         Set(visits.filter { !$0.cityName.isEmpty }.map { "\($0.countryCode.uppercased())|\($0.cityName)" })
@@ -102,10 +110,31 @@ struct SearchView: View {
         }
         .background(Theme.Palette.ground.ignoresSafeArea())
         .onAppear { focused = true }
+        .sheet(item: $selectedTrip) { trip in
+            NavigationStack {
+                TripDetailView(trip: trip)
+                    .navigationDestination(for: Suitcase.self) { PackingChecklistView(suitcase: $0) }
+            }
+        }
+        .sheet(item: $selectedCountryISO) { CountryDetailView(iso: $0.id) }
+    }
+
+    private func open(_ result: Result) {
+        switch result {
+        case .trip(let trip):            selectedTrip = trip
+        case .country(let country, _):   selectedCountryISO = ISOWrap(id: country.code)
+        case .city(_, let iso, _, _):    selectedCountryISO = ISOWrap(id: iso)
+        }
     }
 
     @ViewBuilder
     private func row(_ result: Result) -> some View {
+        Button { open(result) } label: { rowLabel(result) }
+            .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func rowLabel(_ result: Result) -> some View {
         switch result {
         case .trip(let trip):
             resultRow(
