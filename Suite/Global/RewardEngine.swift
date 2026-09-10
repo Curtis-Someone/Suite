@@ -64,6 +64,27 @@ enum RewardEngine {
             message: message))
     }
 
+    /// R5 — a friend request was accepted (either side).
+    static func friendAdded(name: String, sharedTripCount: Int) {
+        let who = name.isEmpty || name == "Pending invite" ? "your friend" : name
+        let tail = sharedTripCount > 0
+            ? "\(sharedTripCount) \(sharedTripCount == 1 ? "trip" : "trips") in common."
+            : ""
+        RewardPresenter.present(Reward(
+            kind: .friendAdded,
+            title: "You and \(who) are now friends.",
+            message: tail))
+    }
+
+    /// R6 — the first trip you and a friend both completed.
+    static func firstTripTogether(name: String, destination: String) {
+        let where_ = destination.isEmpty ? "your first trip" : destination
+        RewardPresenter.present(Reward(
+            kind: .firstTripTogether,
+            title: "First trip with \(name) complete.",
+            message: "\(where_) is stamped in both your passports."))
+    }
+
     private static func ordinal(_ n: Int) -> String {
         let f = NumberFormatter()
         f.numberStyle = .ordinal

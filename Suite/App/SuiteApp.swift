@@ -16,7 +16,7 @@ struct SuiteApp: App {
         .modelContainer(for: [
             Trip.self, Suitcase.self, Item.self,
             Template.self, TemplateItem.self,
-            Traveler.self, WeatherDay.self,
+            Traveler.self, WeatherDay.self, Friend.self,
             VisitedPlace.self, WishlistPlace.self, UserSettings.self,
         ])
     }

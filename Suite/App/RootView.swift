@@ -43,6 +43,22 @@ struct RootView: View {
         case "reward2":      return AnyView(RewardDemo(.init(kind: .tripComplete, title: "Trip complete.", message: "Kyoto in autumn is stamped in your passport. 6 days, 2 cities.")))
         case "reward3":      return AnyView(RewardDemo(.init(kind: .country, title: "That's your 8th country.", message: "4% of the world explored, and Europe is now 7 of 51.")))
         case "reward4":      return AnyView(RewardDemo(.init(kind: .milestone, title: "10 countries.", message: "5% of the world. Keep the passport moving.")))
+        case "reward5":      return AnyView(RewardDemo(.init(kind: .friendAdded, title: "You and Maria are now friends.", message: "2 trips in common.")))
+        case "reward6":      return AnyView(RewardDemo(.init(kind: .firstTripTogether, title: "First trip with Maria complete.", message: "Lisbon, Portugal is stamped in both your passports.")))
+        case "addFriends":   return AnyView(AddFriendsView())
+        case "friendProfile":
+            return AnyView(FriendProfileView(friend: Friend(
+                displayName: "Maria Alvés", status: .accepted, sharesPassport: true,
+                countryCodes: ["PT", "ES", "FR", "IT", "MA", "BR", "MX", "JP", "TH", "GR", "HR", "IS"],
+                cityCount: 21,
+                sharedTrips: [SharedTripInfo(destination: "Lisbon, Portugal", countryCode: "PT", dateRange: "04–10 Nov 2024")])))
+        case "friendProfileLocked":
+            return AnyView(FriendProfileView(friend: Friend(displayName: "Maria Alvés", status: .accepted)))
+        case "friendRequest":
+            return AnyView(ZStack {
+                Theme.Palette.ground.ignoresSafeArea()
+                FriendRequestCard(name: "Amara Okafor", onAccept: {}, onDecline: {}).padding(24)
+            })
         case "paywall":      return AnyView(PaywallView())
         case "purchaseDone": return AnyView(PurchaseConfirmationView {})
         case "exportDoc":    return AnyView(ScrollView { PackingListDocument.sample })

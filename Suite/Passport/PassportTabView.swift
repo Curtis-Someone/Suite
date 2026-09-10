@@ -7,16 +7,26 @@ struct PassportTabView: View {
     private let entitlements = Entitlements.shared
     @Query private var visits: [VisitedPlace]
     @Query(sort: \Trip.endDate, order: .reverse) private var allTrips: [Trip]
+    @Query private var settingsList: [UserSettings]
     @State private var didSeed = false
 
     @State private var mode: Mode = ProcessInfo.processInfo.arguments.contains("-passportTrips") ? .trips : .passport
+    @State private var scope: Scope = ProcessInfo.processInfo.arguments.contains("-passportFriends") ? .friends : .you
     @State private var year: Int? = nil          // nil = all time
     @State private var showingAdd = ProcessInfo.processInfo.arguments.contains("-openAddVisit")
     @State private var showingBuilder = false
+    @State private var showingAddFriends = false
+    @State private var upsell: UpsellMoment?
     @State private var path = NavigationPath()
 
     enum Mode: Hashable { case trips, passport }
+    enum Scope: Hashable { case you, friends }
     private struct CountryList: Hashable {}
+
+    private var myName: String {
+        let n = settingsList.first?.displayName ?? ""
+        return n.isEmpty ? "You" : n
+    }
 
     private var filteredVisits: [VisitedPlace] {
         guard let year else { return visits }
@@ -43,7 +53,11 @@ struct PassportTabView: View {
                     ScrollView {
                         VStack(spacing: 14) {
                             switch mode {
-                            case .passport: passportContent
+                            case .passport:
+                                switch scope {
+                                case .you:     passportContent
+                                case .friends: friendsContent
+                                }
                             case .trips:    TripsListView(trips: pastTrips) { showingBuilder = true }
                             }
                         }
@@ -57,14 +71,20 @@ struct PassportTabView: View {
             .navigationDestination(for: CountryList.self) { _ in CountryListView() }
             .navigationDestination(for: Trip.self) { TripDetailView(trip: $0) }
             .navigationDestination(for: Suitcase.self) { PackingChecklistView(suitcase: $0) }
+            .navigationDestination(for: Friend.self) { FriendProfileView(friend: $0) }
         }
         .sheet(isPresented: $showingAdd) { AddVisitView() }
+        .sheet(item: $upsell) { UpsellSheet(moment: $0) }
+        .fullScreenCover(isPresented: $showingAddFriends) { AddFriendsView() }
         .fullScreenCover(isPresented: $showingBuilder) { NewTripFlow { _ in } }
         .task {
             guard !didSeed else { return }
             didSeed = true
             if ProcessInfo.processInfo.arguments.contains("-seedVisits") && visits.count < 3 {
                 SampleData.seedVisitsDemo(into: context)
+            }
+            if ProcessInfo.processInfo.arguments.contains("-seedFriends") {
+                SampleData.seedFriendsDemo(into: context)
             }
         }
     }
@@ -104,7 +124,23 @@ struct PassportTabView: View {
                 selection: $mode
             )
 
-            if mode == .passport && !years.isEmpty {
+            if mode == .passport {
+                SegmentedToggle(
+                    options: [(Scope.you, "You"), (Scope.friends, "Friends")],
+                    selection: Binding(
+                        get: { scope },
+                        set: { requested in
+                            guard requested == .friends else { scope = .you; return }
+                            switch PackingGate.canUseFriends(isPro: entitlements.isPro) {
+                            case .allowed:             scope = .friends
+                            case .blocked(let reason): upsell = reason
+                            }
+                        }),
+                    height: 38
+                )
+            }
+
+            if mode == .passport && scope == .you && !years.isEmpty {
                 HStack(spacing: 8) {
                     FilterChip(title: "All time", isActive: year == nil) { year = nil }
                     ForEach(years, id: \.self) { y in
@@ -120,6 +156,18 @@ struct PassportTabView: View {
     }
 
     // MARK: Passport content
+
+    /// Friends scope — the percentile stat stays visible above the list.
+    @ViewBuilder
+    private var friendsContent: some View {
+        inTotalCard
+        FriendsListView(
+            myName: myName,
+            myCountryCount: stats.countryCount,
+            myWorldPercent: stats.worldPercent,
+            onOpenFriend: { path.append($0) },
+            onAddFriend: { showingAddFriends = true })
+    }
 
     @ViewBuilder
     private var passportContent: some View {

@@ -124,7 +124,7 @@ enum SampleData {
         return try! ModelContainer(
             for: Trip.self, Suitcase.self, Item.self,
             Template.self, TemplateItem.self,
-            Traveler.self, WeatherDay.self,
+            Traveler.self, WeatherDay.self, Friend.self,
             VisitedPlace.self, UserSettings.self,
             configurations: config
         )

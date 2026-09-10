@@ -14,6 +14,10 @@ final class UserSettings {
     var memberSince: Date = Date.now
     var packingReminders: Bool = false
     var tripRecaps: Bool = false
+    /// Pro · off by default — lets accepted friends see your passport.
+    var friendsCanSeePassport: Bool = false
+    /// Your friend-invite code, generated once on first use.
+    var myShareCode: String = ""
 
     init() {
         self.hasCompletedOnboarding = false
@@ -24,6 +28,8 @@ final class UserSettings {
         self.memberSince = .now
         self.packingReminders = false
         self.tripRecaps = false
+        self.friendsCanSeePassport = false
+        self.myShareCode = ""
     }
 }
 

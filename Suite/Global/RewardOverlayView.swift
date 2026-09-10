@@ -59,13 +59,15 @@ struct RewardOverlayView: View {
                 .foregroundStyle(Theme.Palette.textHeading)
                 .padding(.top, 4)
 
-            Text(reward.message)
-                .font(.archivo(14))
-                .lineSpacing(3)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .foregroundStyle(Theme.Palette.textSecondary)
-                .padding(.top, 10)
+            if !reward.message.isEmpty {
+                Text(reward.message)
+                    .font(.archivo(14))
+                    .lineSpacing(3)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .foregroundStyle(Theme.Palette.textSecondary)
+                    .padding(.top, 10)
+            }
         }
         .padding(.horizontal, 26)
         .padding(.bottom, 30)

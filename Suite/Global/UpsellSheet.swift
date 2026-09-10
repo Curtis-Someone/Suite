@@ -72,6 +72,7 @@ struct UpsellSheet: View {
         case .thirdActiveTrip: "luggage"
         case .saveTemplate:    "book-open"
         case .addTraveler:     "users"
+        case .friends:         "users"
         case .smartSuggestions: "sparkles"
         case .exportTrip:      "share-2"
         }
@@ -83,6 +84,7 @@ struct UpsellSheet: View {
         case .thirdActiveTrip: "Plan more trips at once"
         case .saveTemplate:    "Save it as a template"
         case .addTraveler:     "Travel together"
+        case .friends:         "Travel with friends"
         case .smartSuggestions: "Smart packing"
         case .exportTrip:      "Take your list anywhere"
         }
@@ -98,6 +100,8 @@ struct UpsellSheet: View {
             "Turn a packed trip into a reusable list. Templates are a Pro feature."
         case .addTraveler:
             "Add people to a trip and it syncs across everyone's devices. Part of Pro."
+        case .friends:
+            "Add friends to compare passports, rank countries and see whose map you're both filling in. Part of Pro."
         case .smartSuggestions:
             "Let Suite suggest what to pack from the trip type and the forecast. Pro only."
         case .exportTrip:

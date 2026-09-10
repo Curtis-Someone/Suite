@@ -17,6 +17,7 @@ struct TripDetailView: View {
 
     @State private var showingBuilder = false
     @State private var showingEdit = false
+    @State private var showingTravelerPicker = false
     @State private var upsell: UpsellMoment?
     @State private var confirmDeleteTrip = false
     @State private var suitcaseToDelete: Suitcase?
@@ -38,6 +39,7 @@ struct TripDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     statTiles
+                    travelersSection
                     suitcasesSection
                 }
                 .padding(.horizontal, 20)
@@ -54,6 +56,9 @@ struct TripDetailView: View {
         }
         .fullScreenCover(isPresented: $showingEdit) {
             EditTripFlow(trip: trip)
+        }
+        .sheet(isPresented: $showingTravelerPicker) {
+            TravelerPickerSheet(trip: trip).presentationDetents([.medium, .large])
         }
         .sheet(item: $upsell) { UpsellSheet(moment: $0) }
         .alert("Delete this trip?", isPresented: $confirmDeleteTrip) {
@@ -168,6 +173,61 @@ struct TripDetailView: View {
         .background(Theme.Palette.statTile, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
     }
 
+    // MARK: Travelers (Pro — collaborators)
+
+    @ViewBuilder
+    private var travelersSection: some View {
+        let travelers = trip.travelers.sorted { $0.name < $1.name }
+        VStack(alignment: .leading, spacing: 12) {
+            KickerLabel("Travelers")
+
+            ForEach(travelers, id: \.persistentModelID) { traveler in
+                HStack(spacing: 12) {
+                    FriendAvatar(name: traveler.name, size: 36)
+                    Text(traveler.name)
+                        .font(.archivo(15, .semibold))
+                        .foregroundStyle(Theme.Palette.textPrimary)
+                    Spacer()
+                    if !isDone {
+                        Button { removeTraveler(traveler) } label: {
+                            SuiteIconView(icon: .close, size: 15, color: Theme.Palette.textTertiary)
+                                .frame(width: 32, height: 32)
+                        }
+                        .accessibilityLabel("Remove \(traveler.name)")
+                    }
+                }
+                .padding(.horizontal, 16)
+                .frame(height: 56)
+                .background(Theme.Palette.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.chip))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.chip).strokeBorder(Theme.Palette.border))
+            }
+
+            if !isDone {
+                Button { addTravelerTapped() } label: {
+                    HStack(spacing: 10) {
+                        SuiteIconView(icon: .plus, size: 16,
+                                      color: entitlements.isPro ? Theme.Palette.textSecondary : Theme.Palette.textTertiary)
+                        Text("Add a traveler")
+                            .font(.archivo(15, .semibold))
+                            .foregroundStyle(Theme.Palette.textSecondary)
+                        Spacer()
+                        if !entitlements.isPro {
+                            Text("Pro").font(.jetBrainsMono(11, .bold)).foregroundStyle(Theme.Palette.accent)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .frame(height: 56)
+                    .background(
+                        RoundedRectangle(cornerRadius: Theme.Radius.chip)
+                            .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6, 5]))
+                            .foregroundStyle(Theme.Palette.border)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
     // MARK: Suitcases
 
     @ViewBuilder
@@ -269,6 +329,18 @@ struct TripDetailView: View {
         case .allowed:             showingBuilder = true
         case .blocked(let reason): upsell = reason
         }
+    }
+
+    private func addTravelerTapped() {
+        switch PackingGate.canAddTraveler(isPro: entitlements.isPro) {
+        case .allowed:             showingTravelerPicker = true
+        case .blocked(let reason): upsell = reason
+        }
+    }
+
+    private func removeTraveler(_ traveler: Traveler) {
+        context.delete(traveler)
+        try? context.save()
     }
 
     private func reopen() {

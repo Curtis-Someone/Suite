@@ -119,6 +119,7 @@ enum PlanLimits {
     static func maxSuitcasesPerTrip(isPro: Bool) -> Int? { isPro ? nil : 1 }
     static func templatesAllowed(isPro: Bool) -> Bool { isPro }
     static func travelersAllowed(isPro: Bool) -> Bool { isPro }               // bundled with iCloud sync — B11
+    static func friendsAllowed(isPro: Bool) -> Bool { isPro }                 // friends / leaderboard / friend passports — B11
     static func smartWeatherSuggestionsAllowed(isPro: Bool) -> Bool { isPro } // suggestions only; basic forecast is free
     static func exportAllowed(isPro: Bool) -> Bool { isPro }
     // Basic passport tracking (country count, world %) is intentionally NOT gated —
@@ -139,6 +140,7 @@ enum UpsellMoment: String, Identifiable {
     case thirdActiveTrip
     case saveTemplate
     case addTraveler        // wired in B11 with the invite/sync flow
+    case friends            // Friends tab / Add Friends / a friend's passport
     case smartSuggestions
     case exportTrip
     var id: String { rawValue }
@@ -163,6 +165,10 @@ enum PackingGate {
 
     static func canAddTraveler(isPro: Bool) -> GateResult {
         PlanLimits.travelersAllowed(isPro: isPro) ? .allowed : .blocked(reason: .addTraveler)
+    }
+
+    static func canUseFriends(isPro: Bool) -> GateResult {
+        PlanLimits.friendsAllowed(isPro: isPro) ? .allowed : .blocked(reason: .friends)
     }
 
     static func canShowSmartSuggestions(isPro: Bool) -> GateResult {

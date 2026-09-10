@@ -3,17 +3,19 @@ import SwiftUI
 /// One reward-overlay payload. The copy is pre-rendered with real values by
 /// `RewardEngine`; the view only lays it out.
 struct Reward: Equatable {
-    enum Kind { case packed, tripComplete, country, milestone }
+    enum Kind { case packed, tripComplete, country, milestone, friendAdded, firstTripTogether }
     var kind: Kind
     var title: String
     var message: String
 
     var iconName: String {
         switch kind {
-        case .packed:       "luggage"
-        case .tripComplete: "circle-check"
-        case .country:      "map-pin"
-        case .milestone:    "globe"
+        case .packed:            "luggage"
+        case .tripComplete:      "circle-check"
+        case .country:           "map-pin"
+        case .milestone:         "globe"
+        case .friendAdded:       "heart-handshake"
+        case .firstTripTogether: "circle-check"
         }
     }
 }

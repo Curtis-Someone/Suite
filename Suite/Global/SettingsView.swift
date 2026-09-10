@@ -74,6 +74,17 @@ struct SettingsView: View {
                         toggleRow("Trip recaps", isOn: Binding(
                             get: { settings.tripRecaps },
                             set: { settings.tripRecaps = $0; save() }))
+                        divider
+                        if entitlements.isPro {
+                            toggleRow("Friends can see my passport", isOn: Binding(
+                                get: { settings.friendsCanSeePassport },
+                                set: { settings.friendsCanSeePassport = $0; save() }))
+                        } else {
+                            Button { upsell = .friends } label: {
+                                navRow("Friends can see my passport", value: "Pro")
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
 
                     group("Data") {
@@ -127,7 +138,7 @@ struct SettingsView: View {
         let models: [any PersistentModel.Type] = [
             Trip.self, Suitcase.self, Item.self,
             Template.self, TemplateItem.self,
-            Traveler.self, WeatherDay.self,
+            Traveler.self, WeatherDay.self, Friend.self,
             VisitedPlace.self, WishlistPlace.self, UserSettings.self,
         ]
         for model in models { try? context.delete(model: model) }
